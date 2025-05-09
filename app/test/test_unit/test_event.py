@@ -3,29 +3,19 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 
-from app.models import Event, User
+from app.models import Event
 
 
 class EventModelTest(TestCase):
-    def setUp(self):
-        self.organizer = User.objects.create_user(
-            username="organizador_test",
-            email="organizador@example.com",
-            password="password123",
-            is_organizer=True,
-        )
-
     def test_event_creation(self):
         event = Event.objects.create(
             title="Evento de prueba",
             description="Descripción del evento de prueba",
             scheduled_at=timezone.now() + datetime.timedelta(days=1),
-            organizer=self.organizer,
         )
         """Test que verifica la creación correcta de eventos"""
         self.assertEqual(event.title, "Evento de prueba")
         self.assertEqual(event.description, "Descripción del evento de prueba")
-        self.assertEqual(event.organizer, self.organizer)
         self.assertIsNotNone(event.created_at)
         self.assertIsNotNone(event.updated_at)
 
@@ -56,7 +46,6 @@ class EventModelTest(TestCase):
             title="Nuevo evento",
             description="Descripción del nuevo evento",
             scheduled_at=scheduled_at,
-            organizer=self.organizer,
         )
 
         self.assertTrue(success)
@@ -65,7 +54,6 @@ class EventModelTest(TestCase):
         # Verificar que el evento fue creado en la base de datos
         new_event = Event.objects.get(title="Nuevo evento")
         self.assertEqual(new_event.description, "Descripción del nuevo evento")
-        self.assertEqual(new_event.organizer, self.organizer)
 
     def test_event_new_with_invalid_data(self):
         """Test que verifica que no se crean eventos con datos inválidos"""
@@ -77,7 +65,6 @@ class EventModelTest(TestCase):
             title="",
             description="Descripción del evento",
             scheduled_at=scheduled_at,
-            organizer=self.organizer,
         )
 
         self.assertFalse(success)
@@ -96,14 +83,12 @@ class EventModelTest(TestCase):
             title="Evento de prueba",
             description="Descripción del evento de prueba",
             scheduled_at=timezone.now() + datetime.timedelta(days=1),
-            organizer=self.organizer,
         )
 
         event.update(
             title=new_title,
             description=new_description,
             scheduled_at=new_scheduled_at,
-            organizer=self.organizer,
         )
 
         # Recargar el evento desde la base de datos
@@ -119,7 +104,6 @@ class EventModelTest(TestCase):
             title="Evento de prueba",
             description="Descripción del evento de prueba",
             scheduled_at=timezone.now() + datetime.timedelta(days=1),
-            organizer=self.organizer,
         )
 
         original_title = event.title
@@ -130,7 +114,6 @@ class EventModelTest(TestCase):
             title=None,  # No cambiar
             description=new_description,
             scheduled_at=None,  # No cambiar
-            organizer=None,  # No cambiar
         )
 
         # Recargar el evento desde la base de datos

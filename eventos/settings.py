@@ -109,7 +109,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-AUTH_USER_MODEL = "app.User"
 LANGUAGE_CODE = "es-ar"
 
 TIME_ZONE = "UTC"
@@ -128,9 +127,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-LOGIN_REDIRECT_URL = "/events/"
-
-LOGIN_URL = "/accounts/login/"
-
-LOGOUT_REDIRECT_URL = "/accounts/login/"
