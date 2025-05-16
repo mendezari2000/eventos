@@ -12,7 +12,7 @@ class EventListView(ListView):
     context_object_name = "events"
 
     def get_queryset(self):
-        return Event.objects.all().order_by("scheduled_at")
+        return Event.objects.all().order_by("date")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

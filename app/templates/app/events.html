@@ -21,7 +21,7 @@
                 <tr>
                     <td>{{ event.title }}</td>
                     <td>{{ event.description }}</td>
-                    <td>{{ event.scheduled_at|date:"d b Y, H:i" }}</td>
+                    <td>{{ event.date|date:"d b Y, H:i" }}</td>
                     <td>
                         <div class="hstack gap-1">
                             <a href="{% url 'event_detail' event.id %}"

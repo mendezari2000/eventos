@@ -15,13 +15,13 @@ class BaseEventTestCase(TestCase):
         self.event1 = Event.objects.create(
             title="Evento 1",
             description="Descripción del evento 1",
-            scheduled_at=timezone.now() + datetime.timedelta(days=1),
+            date=timezone.now() + datetime.timedelta(days=1),
         )
 
         self.event2 = Event.objects.create(
             title="Evento 2",
             description="Descripción del evento 2",
-            scheduled_at=timezone.now() + datetime.timedelta(days=2),
+            date=timezone.now() + datetime.timedelta(days=2),
         )
 
         # Cliente para hacer peticiones
