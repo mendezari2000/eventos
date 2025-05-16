@@ -4,7 +4,7 @@ from django.db import models
 class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    scheduled_at = models.DateTimeField()
+    date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -12,7 +12,7 @@ class Event(models.Model):
         return self.title
 
     @classmethod
-    def validate(cls, title, description, scheduled_at):
+    def validate(cls, title, description, date):
         errors = {}
 
         if title == "":
@@ -24,8 +24,8 @@ class Event(models.Model):
         return errors
 
     @classmethod
-    def new(cls, title, description, scheduled_at):
-        errors = Event.validate(title, description, scheduled_at)
+    def new(cls, title, description, date):
+        errors = Event.validate(title, description, date)
 
         if len(errors.keys()) > 0:
             return False, errors
@@ -33,14 +33,14 @@ class Event(models.Model):
         Event.objects.create(
             title=title,
             description=description,
-            scheduled_at=scheduled_at,
+            date=date,
         )
 
         return True, None
 
-    def update(self, title, description, scheduled_at):
+    def update(self, title, description, date):
         self.title = title or self.title
         self.description = description or self.description
-        self.scheduled_at = scheduled_at or self.scheduled_at
+        self.date = date or self.date
 
         self.save()
