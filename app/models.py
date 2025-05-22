@@ -44,3 +44,26 @@ class Event(models.Model):
         self.date = date or self.date
 
         self.save()
+
+class User(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True)
+
+#clase para la prioridad de las notificaciones
+class Priority(models.TextChoices):
+    HIGH = 'HIGH', 'High'
+    MEDIUM = 'MEDIUM', 'Medium'
+    LOW = 'LOW', 'Low'
+
+
+class Notification(models.Model):
+
+    title = models.CharField(max_length=200)
+    message = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    priority = models.CharField(
+        max_length=6,
+        choices=Priority.choices,
+        default= Priority.LOW)
+    is_read = models.BooleanField(default=False)
+    users = models.ManyToManyField('User', related_name='notifications')
