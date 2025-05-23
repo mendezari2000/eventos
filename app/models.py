@@ -95,3 +95,26 @@ class Comment (models.Model):
 
 def _str_(self):
     return f"Comment by {self.user.username} on {self.event}"
+
+class Rating(models.Model):
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    rating = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey('User',on_delete=models.CASCADE, related_name='ratings')
+    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='events') 
+
+class Type_Ticket(models.TextChoices):
+    GENERAL = 'general', 'General'
+    VIP = 'vip', 'Vip'
+    
+class Ticket(models.Model):
+    buy_date = models.DateField(auto_now_add=True)
+    ticket_code = models.CharField(max_length=100, unique=True)
+    quantity= models.IntegerField()
+    type_ticket = models.CharField(
+        max_length=7,
+        choices=Type_Ticket.choices,
+        default=Type_Ticket.GENERAL)
+    user = models.ForeignKey('User',on_delete=models.CASCADE,related_name='tickets')
+    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='events')
