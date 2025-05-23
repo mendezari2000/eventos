@@ -49,6 +49,9 @@ class User(models.Model):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
 
+    def __str__(self):
+        return self.username
+
 #clase para la prioridad de las notificaciones
 class Priority(models.TextChoices):
     HIGH = 'HIGH', 'High'
@@ -67,6 +70,9 @@ class Notification(models.Model):
         default= Priority.LOW)
     is_read = models.BooleanField(default=False)
     users = models.ManyToManyField('User', related_name='notifications')
+
+    def __str__(self):
+        return f"Notification {self.title} - {self.created_at}"
 
 class RefundRequest (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
