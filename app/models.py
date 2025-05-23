@@ -1,5 +1,26 @@
 from django.db import models
 
+class Venue (models.Model):
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=200)
+    city = models.CharField(max_length=100)
+    capacity = models.IntegerField()
+    contact = models.CharField(max_length=100)
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+    is_active = models.BooleanField()
+
+class Event(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
 
 class Event(models.Model):
     title = models.CharField(max_length=200)
