@@ -78,12 +78,12 @@ class RefundRequest (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
     approved = models.BooleanField(default=False)
     approval_date = models.DateField(null=True, blank=True)
-    ticket_code = models.Charfield(max_length=100)
+    ticket_code = models.CharField(max_length=100)
     reason = models.TextField()
     #el campo created_at se autogenera con la fecha en la que se crea la soli.
     created_at = models.DateField(auto_now_add=True)
 
-    def _str_(self):
+    def __str__(self):
         return f"Refund {self.ticket_code} by {self.user.username}"
     
 class Comment (models.Model):
@@ -93,8 +93,8 @@ class Comment (models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-def _str_(self):
-    return f"Comment by {self.user.username} on {self.event}"
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.event}"
 
 class Rating(models.Model):
     title = models.CharField(max_length=200)
@@ -102,7 +102,7 @@ class Rating(models.Model):
     rating = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey('User',on_delete=models.CASCADE, related_name='ratings')
-    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='events') 
+    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='ratings') 
 
 class Type_Ticket(models.TextChoices):
     GENERAL = 'general', 'General'
@@ -117,4 +117,4 @@ class Ticket(models.Model):
         choices=Type_Ticket.choices,
         default=Type_Ticket.GENERAL)
     user = models.ForeignKey('User',on_delete=models.CASCADE,related_name='tickets')
-    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='events')
+    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='tickets')
