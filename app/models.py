@@ -67,3 +67,25 @@ class Notification(models.Model):
         default= Priority.LOW)
     is_read = models.BooleanField(default=False)
     users = models.ManyToManyField('User', related_name='notifications')
+
+class RefundRequest (models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
+    approved = models.BooleanField(default=False)
+    approval_date = models.DateField(null=True, blank=True)
+    ticket_code = models.Charfield(max_length=100)
+    reason = models.TextField()
+    #el campo created_at se autogenera con la fecha en la que se crea la soli.
+    created_at = models.DateField(auto_now_add=True)
+
+    def _str_(self):
+        return f"Refund {self.ticket_code} by {self.user.username}"
+    
+class Comment (models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments')
+    title = models.CharField(max_length=100)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+def _str_(self):
+    return f"Comment by {self.user.username} on {self.event}"
