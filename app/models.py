@@ -140,16 +140,16 @@ class Comment (models.Model):
     def validate(cls, user, event, title, text):
         errors = {}
 
-        if not user:
+        if user == "":
             errors["user"] = "El usuario del comentario es obligatorio"
         
-        if not event:
+        if event == "":
             errors["event"] = "El evento del comentario es obligatorio"
 
-        if not title:
+        if title == "":
             errors["title"] = "El titulo del comentario es obligatorio"
 
-        if not text:
+        if text == "":
             errors["text"] = "El texto del comentario es obligatorio"
 
         return errors
@@ -161,11 +161,11 @@ class Comment (models.Model):
         if len(errors.keys()) > 0:
             return False, errors
 
-        comment = Comment.objects.create(
+        Comment.objects.create(
             user=user,
             event=event,
             title=title,
-            text=text
+            text=text,
         )
 
         return True, None
