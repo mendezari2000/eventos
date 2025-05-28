@@ -29,11 +29,11 @@ class Event(models.Model):
     def validate(cls, title, description, date, venue, category):
         errors = {}
 
-        if not title:
-            errors["title"] = "Por favor ingrese un título"
+        if title == "":
+            errors["title"] = "Por favor ingrese un titulo"
 
-        if not description:
-            errors["description"] = "Por favor ingrese una descripción"
+        if description == "":
+            errors["description"] = "Por favor ingrese una descripcion"
 
         if not date:
             errors["date"] = "Por favor ingrese una fecha válida"
