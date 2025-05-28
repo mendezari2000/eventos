@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 class Venue (models.Model):
     name = models.CharField(max_length=100)
@@ -25,31 +26,44 @@ class Event(models.Model):
         return self.title
 
     @classmethod
-    def validate(cls, title, description, date):
+    def validate(cls, title, description, date, venue, category):
         errors = {}
 
-        if title == "":
-            errors["title"] = "Por favor ingrese un titulo"
+        if not title:
+            errors["title"] = "Por favor ingrese un título"
 
-        if description == "":
-            errors["description"] = "Por favor ingrese una descripcion"
+        if not description:
+            errors["description"] = "Por favor ingrese una descripción"
+
+        if not date:
+            errors["date"] = "Por favor ingrese una fecha válida"
+        elif date < now():
+            errors["date"] = "La fecha no puede ser en el pasado"
+
+        if venue is None:
+            errors["venue"] = "Debe asignar un venue válido"
+
+        if category is None:
+            errors["category"] = "Debe asignar una categoría válida"
 
         return errors
 
     @classmethod
-    def new(cls, title, description, date):
-        errors = Event.validate(title, description, date)
+    def new(cls, title, description, date, venue=None, category=None):
+        errors = cls.validate(title, description, date, venue, category)
 
-        if len(errors.keys()) > 0:
+        if errors:
             return False, errors
 
-        Event.objects.create(
+        event = cls.objects.create(
             title=title,
             description=description,
             date=date,
+            venue=venue,
+            category=category
         )
 
-        return True, None
+        return True, event
 
     def update(self, title, description, date):
         self.title = title or self.title
