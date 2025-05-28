@@ -55,7 +55,7 @@ class Event(models.Model):
         if errors:
             return False, errors
 
-        event = cls.objects.create(
+        event = Event.objects.create(
             title=title,
             description=description,
             date=date,
@@ -100,6 +100,51 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification {self.title} - {self.created_at}"
+
+    @classmethod
+    def validate(cls, title, message, priority):
+        errors = {}
+
+        if not title:
+            errors["title"] = "Por favor ingrese un título"
+        
+        if not message:
+            errors["message"] = "Por favor ingrese un mensaje"
+        
+        if priority not in [choice[0] for choice in Priority.choices]:
+            errors["priority"] = "Por favor ingrese una prioridad válida"
+        
+        return errors
+        
+    @classmethod
+    def new(cls, title, message, priority, users):
+        errors = cls.validate(title, message, priority)
+
+        if errors:
+            return False, errors
+
+        notification = Notification.objects.create(
+            title=title,
+            message=message,
+            priority=priority
+        )
+        
+        notification.users.set(users)
+
+        return True, notification
+    
+    def update(self, title=None, message=None, priority=None):
+        if title:
+            self.title = title
+        if message:
+            self.message = message
+        if priority:
+            self.priority = priority
+        
+        self.save()
+    
+
+
 
 class RefundRequest (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
