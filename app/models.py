@@ -30,10 +30,10 @@ class Event(models.Model):
         errors = {}
 
         if title == "":
-            errors["title"] = "Por favor ingrese un titulo"
+            errors["title"] = "Por favor ingrese un título"
 
         if description == "":
-            errors["description"] = "Por favor ingrese una descripcion"
+            errors["description"] = "Por favor ingrese una descripción"
 
         if not date:
             errors["date"] = "Por favor ingrese una fecha válida"
@@ -119,6 +119,47 @@ class Comment (models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Comment (models.Model):
+        user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+        event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments')
+        title = models.CharField(max_length=100)
+        text = models.TextField()
+        created_at = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def validate(cls, user, event, title, text):
+        errors = {}
+
+        if user == "":
+            errors["user"] = "El usuario del comentario es obligatorio"
+        
+        if event == "":
+            errors["event"] = "El evento del comentario es obligatorio"
+
+        if title == "":
+            errors["title"] = "El titulo del comentario es obligatorio"
+
+        if text == "":
+            errors["text"] = "El texto del comentario es obligatorio"
+
+        return errors
+    
+    @classmethod
+    def new(cls, user, event, title, text):
+        errors = Comment.validate(user, event, title, text)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+
+        Comment.objects.create(
+            user=user,
+            event=event,
+            title=title,
+            text=text,
+        )
+
+        return True, None
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.event}"
