@@ -266,17 +266,10 @@ class Comment (models.Model):
     def validate(cls, user, event, title, text):
         errors = {}
 
-<<<<<<< HEAD
-        if user == "":
-            errors["user"] = "El usuario del comentario es obligatorio"
-        
-        if event == "":
-=======
         if not user:
             errors["user"] = "El usuario del comentario es obligatorio"
         
         if not event:
->>>>>>> fixtest
             errors["event"] = "El evento del comentario es obligatorio"
 
         if title == "":
