@@ -78,6 +78,38 @@ class User(models.Model):
 
     def __str__(self):
         return self.username
+    
+    @classmethod
+    def validate(cls, username, email):
+        errors = {}
+
+        if not username:
+            errors["username"] = "Por favor ingrese un nombre de usuario"
+
+        if not email:
+            errors["email"] = "Por favor ingrese un correo electrónico valido"
+
+        return errors
+
+    @classmethod
+    def new(cls, username, email):
+        errors = cls.validate(username,email)
+
+        if errors:
+            return False, errors
+
+        user = User.objects.create(
+            username = username,
+            email = email
+        )
+        return True, user
+    
+    def update(self, username=None, email=None):
+        self.username = username 
+        self.email = email
+
+        self.save()
+
 
 #clase para la prioridad de las notificaciones
 class Priority(models.TextChoices):
