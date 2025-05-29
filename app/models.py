@@ -55,7 +55,7 @@ class Event(models.Model):
         if errors:
             return False, errors
 
-        event = Event.objects.create(
+        Event.objects.create(
             title=title,
             description=description,
             date=date,
@@ -63,12 +63,16 @@ class Event(models.Model):
             category=category
         )
 
-        return True, event
+        return True, None
 
-    def update(self, title, description, date):
+    def update(self, title, description, date, venue=None, category=None):
         self.title = title or self.title
         self.description = description or self.description
         self.date = date or self.date
+        if venue is not None:
+            self.venue = venue
+        if category is not None:
+            self.category = category
 
         self.save()
 
@@ -98,11 +102,11 @@ class User(models.Model):
         if errors:
             return False, errors
 
-        user = User.objects.create(
+        User.objects.create(
             username = username,
             email = email
         )
-        return True, user
+        return True, None
     
     def update(self, username=None, email=None):
         self.username = username 
@@ -163,7 +167,7 @@ class Notification(models.Model):
         
         notification.users.set(users)
 
-        return True, notification
+        return True, None
     
     def update(self, title=None, message=None, priority=None):
         if title:
@@ -190,6 +194,37 @@ class RefundRequest (models.Model):
     def __str__(self):
         return f"Refund {self.ticket_code} by {self.user.username}"
     
+    @classmethod
+    def validate(cls, user, ticket_code, reason):
+        errors = {}
+
+        if ticket_code =="":
+            errors["ticket_code"] = "El codigo de la solicitud es obligatorio"
+            
+        if reason == "":
+            errors["reason"] = "El motivo de la solicitud es obligatorio"
+
+        if user == "":
+            errors["user"] = "El usuario de la solicitud es obligatorio"   
+            
+        return errors
+
+    @classmethod
+    def new(cls, user, ticket_code, reason):
+        errors = RefundRequest.validate(user, ticket_code, reason)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+
+        RefundRequest.objects.create(
+            user=user,
+            ticket_code=ticket_code,
+            reason=reason,
+        )
+
+        return True, None
+    
+    
 class Comment (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments')
@@ -197,21 +232,14 @@ class Comment (models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Comment (models.Model):
-        user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-        event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments')
-        title = models.CharField(max_length=100)
-        text = models.TextField()
-        created_at = models.DateTimeField(auto_now_add=True)
-
     @classmethod
     def validate(cls, user, event, title, text):
         errors = {}
 
-        if user == "":
+        if not user:
             errors["user"] = "El usuario del comentario es obligatorio"
         
-        if event == "":
+        if not event:
             errors["event"] = "El evento del comentario es obligatorio"
 
         if title == "":

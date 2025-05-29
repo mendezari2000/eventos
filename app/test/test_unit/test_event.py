@@ -46,7 +46,7 @@ class EventModelTest(TestCase):
         )
 
         self.assertTrue(success)
-        self.assertIsInstance(errors, Event)
+        self.assertIsNone(errors)
 
         new_event = Event.objects.get(title="Nuevo evento")
         self.assertEqual(new_event.description, "Descripción del nuevo evento")
