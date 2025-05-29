@@ -3,7 +3,7 @@ import datetime
 from django.utils import timezone
 from playwright.sync_api import expect
 
-from app.models import Event
+from app.models import Event, Venue, Category
 
 from app.test.test_e2e.base import BaseE2ETest
 
@@ -14,13 +14,28 @@ class EventBaseTest(BaseE2ETest):
     def setUp(self):
         super().setUp()
 
-        # Crear eventos de prueba
+        # Crear dependencias
+        self.venue = Venue.objects.create(
+            name="Salón Principal",
+            address="Calle Falsa 123",
+            city="Ciudad Test",
+            capacity=100,
+            contact="contacto@example.com",
+        )
+        self.category = Category.objects.create(
+            name="Conferencia",
+            description="Conferencias y charlas técnicas",
+            is_active=True,
+        )
+
         # Evento 1
         event_date1 = timezone.make_aware(datetime.datetime(2025, 2, 10, 10, 10))
         self.event1 = Event.objects.create(
             title="Evento de prueba 1",
             description="Descripción del evento 1",
             date=event_date1,
+            venue=self.venue,
+            category=self.category,
         )
 
         # Evento 2
@@ -29,7 +44,10 @@ class EventBaseTest(BaseE2ETest):
             title="Evento de prueba 2",
             description="Descripción del evento 2",
             date=event_date2,
+            venue=self.venue,
+            category=self.category,
         )
+
 
     def _table_has_event_info(self):
         """Método auxiliar para verificar que la tabla tiene la información correcta de eventos"""
