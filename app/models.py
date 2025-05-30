@@ -11,7 +11,38 @@ class Venue (models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
-    is_active = models.BooleanField()
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+    
+    @classmethod
+    def validate(cls, name, description):
+        errors = {}
+
+        if name  == "":
+            errors["name"] = "La categoría debe tener un nombre"
+        
+        if description  == "":
+            errors["description"] = "La categoría debe tener una descripción"
+
+        return errors
+    
+    @classmethod
+    def new(cls, name, description, is_active):
+        errors = Category.validate(name, description)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+        
+        Category.objects.create(
+            name=name,
+            description=description,
+            is_active=is_active,
+        )
+
+        return True, None
+
 
 class Event(models.Model):
     title = models.CharField(max_length=200)
@@ -307,6 +338,49 @@ class Rating(models.Model):
     user = models.ForeignKey('User',on_delete=models.CASCADE, related_name='ratings')
     event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='ratings') 
 
+    def _str_(self):
+        return f"Rating de {self.title} igual a {self.rating}"
+    
+    @classmethod
+    def validate (cls, title, text, rating, user, event):
+        errors = {}
+
+        if title == "":
+            errors["title"] = "Debe ingresar un titulo"
+
+        if text == "":
+            errors["text"] = "Debe ingresar un texto"
+
+        if title == "":
+            errors["title"] = "Debe ingresar un titulo"
+
+        if (rating<0) and (rating>5):
+            errors["rating"] = "Debe ingresar un puntuación"
+        
+        if user is None:
+            errors["user"] = "Es obligatorio un usuario"
+        
+        if event is None:
+            errors["event"] = "Es obligatorio ingresar el evento"
+
+        return errors
+    
+    @classmethod 
+    def new (cls, title, text, rating, user=None, event=None):
+        errors = Rating.validate(title, text, rating);
+
+        if len(errors.keys()) > 0:
+            return False, errors
+        
+        Rating.objects.create(
+            title=title,
+            text=text,
+            rating=rating,
+            user=user,
+            event=event,
+        )
+        return True, None
+
 class Type_Ticket(models.TextChoices):
     GENERAL = 'general', 'General'
     VIP = 'vip', 'Vip'
@@ -321,3 +395,43 @@ class Ticket(models.Model):
         default=Type_Ticket.GENERAL)
     user = models.ForeignKey('User',on_delete=models.CASCADE,related_name='tickets')
     event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='tickets')
+
+    def __str__(self):
+        return f"Codigo de ticket: {self.ticket_code}"
+    
+    @classmethod
+    def validate(cls, ticket_code, quantity, type_ticket, user, event):
+        errors={}
+
+        if ticket_code =="":
+            errors["ticket_code"] = "El codigo del ticket es obligatorio"
+        
+        if quantity<0:
+            errors["quantity"] = "Debe ingresar una cantidad valida"
+
+        if type_ticket not in [choice[0] for choice in Type_Ticket.choices]:
+            errors["type_ticket"] = "Debe ingresar un tipo de ticket valido"
+        
+        if user is None:
+            errors["user"]= "Debe asignarle el ticket a un usuario"
+        
+        if event is None:
+            errors["event"]= "Debe asignarle el ticket a un evento"
+        
+        return errors
+    
+    @classmethod
+    def new(cls, ticket_code, quantity, type_ticket, user=None, event=None):
+        errors = cls.validate(ticket_code, quantity,type_ticket,user,event)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+        
+        Ticket.objects.create(
+            ticket_code=ticket_code,
+            quantity=quantity,
+            type_ticket=type_ticket,
+            user=user,
+            event=event,
+        )
+        return True, None
