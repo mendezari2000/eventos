@@ -354,7 +354,7 @@ class Rating(models.Model):
         if title == "":
             errors["title"] = "Debe ingresar un titulo"
 
-        if (rating<0) and (rating>5):
+        if (rating<0) or (rating>5):
             errors["rating"] = "Debe ingresar un puntuación"
         
         if user is None:
