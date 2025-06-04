@@ -8,6 +8,44 @@ class Venue (models.Model):
     capacity = models.IntegerField()
     contact = models.CharField(max_length=100)
 
+    @classmethod
+    def validate (cls, name, adress, city, capacity, contact):
+        errors = {}
+
+        if name == "":
+            errors["name"] = "El lugar debe tener un nombre"
+        
+        if adress == "":
+            errors["adress"] = "El lugar debe tener una dirección"
+        
+        if city == "":
+            errors["city"] = "El lugar debe tener una ciudad"
+        
+        if capacity <= 0:
+            errors["capacity"] = "La capacidad del lugar debe ser mayor a 0"
+        
+        if contact == "":
+            errors["contact"] = "El lugar debe tener un contacto"
+
+        return errors
+    
+    @classmethod
+    def new(cls, name, adress, city, capacity, contact):
+        errors = Venue.validate(name, adress, city, capacity, contact)
+
+        if len(errors.keys()) > 0:
+            return False, errors
+        
+        Venue.objects.create(
+            name=name,
+            address=adress,
+            city=city,
+            capacity=capacity,
+            contact=contact
+        )
+
+        return True, None
+
 class Category(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
