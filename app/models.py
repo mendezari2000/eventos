@@ -209,9 +209,7 @@ class Notification(models.Model):
             self.priority = priority
         
         self.save()
-    
-
-
+        
 
 class RefundRequest (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
@@ -254,36 +252,6 @@ class RefundRequest (models.Model):
     
     def __str__(self):
         return f"Refund {self.ticket_code} by {self.user.username}"
-    
-    @classmethod
-    def validate(cls, user, ticket_code, reason):
-        errors = {}
-
-        if ticket_code =="":
-            errors["ticket_code"] = "El codigo de la solicitud es obligatorio"
-            
-        if reason == "":
-            errors["reason"] = "El motivo de la solicitud es obligatorio"
-
-        if user == "":
-            errors["user"] = "El usuario de la solicitud es obligatorio"   
-            
-        return errors
-
-    @classmethod
-    def new(cls, user, ticket_code, reason):
-        errors = RefundRequest.validate(user, ticket_code, reason)
-
-        if len(errors.keys()) > 0:
-            return False, errors
-
-        RefundRequest.objects.create(
-            user=user,
-            ticket_code=ticket_code,
-            reason=reason,
-        )
-
-        return True, None
     
     
 class Comment (models.Model):
@@ -338,8 +306,9 @@ class Rating(models.Model):
     user = models.ForeignKey('User',on_delete=models.CASCADE, related_name='ratings')
     event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='ratings') 
 
-    def _str_(self):
+    def __str__(self):
         return f"Rating de {self.title} igual a {self.rating}"
+        
     
     @classmethod
     def validate (cls, title, text, rating, user, event):
@@ -350,9 +319,6 @@ class Rating(models.Model):
 
         if text == "":
             errors["text"] = "Debe ingresar un texto"
-
-        if title == "":
-            errors["title"] = "Debe ingresar un titulo"
 
         if (rating<0) or (rating>5):
             errors["rating"] = "Debe ingresar un puntuación"
