@@ -1,8 +1,16 @@
 from django.views.generic import TemplateView, ListView, DetailView
-from .models import Event
+from .models import Event, Notification, Category
 
+class NotificationListView(ListView):
+    model = Notification
+    template_name = "app/notification.html"
+    context_object_name = "notifications"
+
+    def get_queryset(self):
+        return Notification.objects.all().order_by("priority")
 
 class HomeView(TemplateView):
+    model = Category
     template_name = "home.html"
 
 

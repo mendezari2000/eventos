@@ -17,6 +17,8 @@ Including another URLconf
 
 from django.urls import include, path
 
+from app.views import NotificationListView
+
 urlpatterns = [
-    path("", include("app.urls")),
+    path("", include("app.urls"))
 ]
