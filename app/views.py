@@ -1,5 +1,17 @@
 from django.views.generic import TemplateView, ListView, DetailView
-from .models import Event, Notification, Category
+from .models import Event, Notification, Category, Ticket
+
+class TicketListView(ListView):
+    model = Ticket
+    template_name = "app/tickets.html"
+    context_object_name = "tickets"    
+
+    def get_queryset(self):
+        queryset = Ticket.objects.all().order_by("buy_date")
+        for ticket in queryset:
+            ticket.total = ticket.prize * ticket.quantity
+        return queryset
+
 
 class NotificationListView(ListView):
     model = Notification

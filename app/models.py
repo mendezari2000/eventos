@@ -391,6 +391,8 @@ class Type_Ticket(models.TextChoices):
     
 class Ticket(models.Model):
     buy_date = models.DateField(auto_now_add=True)
+    prize = models.FloatField()
+    total = models.FloatField()
     ticket_code = models.CharField(max_length=100, unique=True)
     quantity= models.IntegerField()
     type_ticket = models.CharField(
@@ -404,8 +406,11 @@ class Ticket(models.Model):
         return f"Codigo de ticket: {self.ticket_code}"
     
     @classmethod
-    def validate(cls, ticket_code, quantity, type_ticket, user, event):
+    def validate(cls, prize, ticket_code, quantity, type_ticket, user, event):
         errors={}
+
+        if prize <0:
+            errors["prize"] = "El precio debe ser mayor a 0"
 
         if ticket_code =="":
             errors["ticket_code"] = "El codigo del ticket es obligatorio"
@@ -425,7 +430,7 @@ class Ticket(models.Model):
         return errors
     
     @classmethod
-    def new(cls, ticket_code, quantity, type_ticket, user=None, event=None):
+    def new(cls, prize, ticket_code, quantity, type_ticket, user=None, event=None):
         errors = cls.validate(ticket_code, quantity,type_ticket,user,event)
 
         if len(errors.keys()) > 0:
@@ -437,5 +442,6 @@ class Ticket(models.Model):
             type_ticket=type_ticket,
             user=user,
             event=event,
+            prize=prize
         )
         return True, None
