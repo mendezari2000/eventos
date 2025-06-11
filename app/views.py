@@ -1,5 +1,45 @@
 from django.views.generic import TemplateView, ListView, DetailView
 from .models import Event, Notification, Category, Ticket
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+
+class LoginView(TemplateView):
+    template_name = "app/login.html"
+    context_object_name = "login"
+
+    def get(self, request, *args, **kwargs):
+        form = UserCreationForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+        return render(request, self.template_name, {'form': form})
+    
+class LogoutView(TemplateView):
+    template_name = "logout.html"
+    context_object_name = "logout"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+    
+class RegisterView(TemplateView):
+    template_name = "register.html"
+    context_object_name = "register"
+    
+    def get(self, request, *args, **kwargs):
+        form = UserCreationForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+        return render(request, self.template_name, {'form': form})
+    
 
 class TicketListView(ListView):
     model = Ticket
