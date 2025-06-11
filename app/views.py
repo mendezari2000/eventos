@@ -1,21 +1,24 @@
 from django.views.generic import TemplateView, ListView, DetailView
 from .models import Event, Notification, Category, Ticket
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
 
 class LoginView(TemplateView):
     template_name = "app/login.html"
     context_object_name = "login"
 
     def get(self, request, *args, **kwargs):
-        form = UserCreationForm()
+        form = AuthenticationForm()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        form = UserCreationForm(request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('home')
+            user = form.get_user()
+            login (request, user)
+            return redirect('profile')
         return render(request, self.template_name, {'form': form})
     
 class LogoutView(TemplateView):
@@ -26,7 +29,7 @@ class LogoutView(TemplateView):
         return render(request, self.template_name)
     
 class RegisterView(TemplateView):
-    template_name = "register.html"
+    template_name = "app/register.html"
     context_object_name = "register"
     
     def get(self, request, *args, **kwargs):
@@ -83,3 +86,7 @@ class EventDetailView(DetailView):
     model = Event
     template_name = "app/event_detail.html"
     context_object_name = "event"
+
+class ProfileView(TemplateView):
+    template_name = "app/account/profile.html"
+    context_object_name = "profile"
