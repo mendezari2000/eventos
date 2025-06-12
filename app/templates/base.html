@@ -43,25 +43,30 @@
                         class="collapse navbar-collapse"
                         id="navbar-content"
                     >
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                {% navbar_link 'events' 'Eventos' %}
-                            </li>
-                            <li class="nav-item">
-                                {% navbar_link 'notifications' 'Notificaciones' %}
-                            </li>
-                            </li>
-                            <li class="nav-item">
-                                {% navbar_link 'tickets' 'Tickets' %}
-                            </li>
-                            <li class="nav-item">
-                                {% navbar_link 'login' 'Iniciar Sesion' %}
-                            </li>
-                            </li>
-                            <li class="nav-item">
-                                {% navbar_link 'register' 'Registrarse' %}
-                            </li>
+                       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            {% if request.user.is_anonymous %}
+                                <li class="nav-item">
+                                    {% navbar_link 'login' 'Iniciar Sesión' %}
+                                </li>
+                                <li class="nav-item">
+                                    {% navbar_link 'register' 'Registrarse' %}
+                                </li>
+                            {% elif request.user.is_authenticated %}
+                                <li class="nav-item">
+                                    {% navbar_link 'events' 'Eventos' %}
+                                </li>
+                                <li class="nav-item">
+                                    {% navbar_link 'notifications' 'Notificaciones' %}
+                                </li>
+                                <li class="nav-item">
+                                    {% navbar_link 'tickets' 'Tickets' %}
+                                </li>
+                                <li class="nav-item">
+                                    {% navbar_link 'logout' 'Cerrar Sesión' %}
+                                </li>
+                            {% endif %}
                         </ul>
+ 
                     </div>
             </div>
         </div>

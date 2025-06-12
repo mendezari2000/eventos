@@ -7,7 +7,9 @@ from .views import (
     NotificationListView,
     TicketListView,
     RegisterView,
-    ProfileView
+    ProfileView,
+    LogoutView,
+
 )
 
 urlpatterns = [
@@ -20,4 +22,5 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='app/login.html'), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path("accounts/profile/", ProfileView.as_view(), name="profile"),
+    path('events/<int:pk>/buy/', EventDetailView.as_view(), name='buy_ticket'),
 ]

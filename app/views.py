@@ -1,9 +1,10 @@
+from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
 from .models import Event, Notification, Category, Ticket
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 class LoginView(TemplateView):
     template_name = "app/login.html"
@@ -21,13 +22,14 @@ class LoginView(TemplateView):
             return redirect('profile')
         return render(request, self.template_name, {'form': form})
     
-class LogoutView(TemplateView):
+class LogoutView(View):
     template_name = "logout.html"
     context_object_name = "logout"
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-    
+        logout(request)
+        return redirect('home')
+   
 class RegisterView(TemplateView):
     template_name = "app/register.html"
     context_object_name = "register"
