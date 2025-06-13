@@ -1,5 +1,7 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
+
+from django.contrib import admin
 from .views import (
     HomeView,
     EventListView,
@@ -23,4 +25,5 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path("accounts/profile/", ProfileView.as_view(), name="profile"),
     path('events/<int:pk>/buy/', EventDetailView.as_view(), name='buy_ticket'),
+    path('admin/', admin.site.urls),
 ]

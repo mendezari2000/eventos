@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
+from django.contrib.auth.models import User
 
 class Venue (models.Model):
     name = models.CharField(max_length=100)
@@ -7,6 +8,9 @@ class Venue (models.Model):
     city = models.CharField(max_length=100)
     capacity = models.IntegerField()
     contact = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.name} - {self.city}"
 
     @classmethod
     def validate (cls, name, adress, city, capacity, contact):
@@ -90,12 +94,17 @@ class Event(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    prize = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return self.title
+    
+    @property
+    def precio_vip(self):
+        return self.prize * 2
 
     @classmethod
-    def validate(cls, title, description, date, venue, category):
+    def validate(cls, title, description, date, venue, category, prize=0.00):
         errors = {}
 
         if title == "":
@@ -114,12 +123,15 @@ class Event(models.Model):
 
         if category is None:
             errors["category"] = "Debe asignar una categoría válida"
+        
+        if prize < 0:
+            errors["prize"] = "El precio del evento no puede ser negativo"
 
         return errors
 
     @classmethod
-    def new(cls, title, description, date, venue=None, category=None):
-        errors = cls.validate(title, description, date, venue, category)
+    def new(cls, title, description, date, venue=None, category=None, prize=0.00):
+        errors = cls.validate(title, description, date, venue, category, prize)
 
         if errors:
             return False, errors
@@ -129,12 +141,13 @@ class Event(models.Model):
             description=description,
             date=date,
             venue=venue,
-            category=category
+            category=category,
+            prize=prize
         )
 
         return True, None
 
-    def update(self, title, description, date, venue=None, category=None):
+    def update(self, title, description, date, venue=None, category=None, prize=0.00):
         self.title = title or self.title
         self.description = description or self.description
         self.date = date or self.date
@@ -142,10 +155,12 @@ class Event(models.Model):
             self.venue = venue
         if category is not None:
             self.category = category
+        self.prize = prize or self.prize
+        self.updated_at = now()  # Update the timestamp to the current time
 
         self.save()
 
-class User(models.Model):
+"""//class User(models.Model):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
 
@@ -182,7 +197,7 @@ class User(models.Model):
         self.email = email
 
         self.save()
-
+"""
 
 #clase para la prioridad de las notificaciones
 class Priority(models.TextChoices):
@@ -201,7 +216,7 @@ class Notification(models.Model):
         choices=Priority.choices,
         default= Priority.LOW)
     is_read = models.BooleanField(default=False)
-    users = models.ManyToManyField('User', related_name='notifications')
+    users = models.ManyToManyField(User, related_name='notifications')
 
     def __str__(self):
         return f"Notification {self.title} - {self.created_at}"
@@ -341,7 +356,7 @@ class Rating(models.Model):
     text = models.TextField()
     rating = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('User',on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User,on_delete=models.CASCADE, related_name='ratings')
     event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='ratings') 
 
     def __str__(self):
@@ -391,26 +406,22 @@ class Type_Ticket(models.TextChoices):
     
 class Ticket(models.Model):
     buy_date = models.DateField(auto_now_add=True)
-    prize = models.FloatField()
-    total = models.FloatField()
     ticket_code = models.CharField(max_length=100, unique=True)
     quantity= models.IntegerField()
     type_ticket = models.CharField(
         max_length=7,
         choices=Type_Ticket.choices,
         default=Type_Ticket.GENERAL)
-    user = models.ForeignKey('User',on_delete=models.CASCADE,related_name='tickets')
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='tickets')
     event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='tickets')
 
     def __str__(self):
         return f"Codigo de ticket: {self.ticket_code}"
     
+    
     @classmethod
-    def validate(cls, prize, ticket_code, quantity, type_ticket, user, event):
+    def validate(cls, ticket_code, quantity, type_ticket, user, event):
         errors={}
-
-        if prize <0:
-            errors["prize"] = "El precio debe ser mayor a 0"
 
         if ticket_code =="":
             errors["ticket_code"] = "El codigo del ticket es obligatorio"
@@ -430,7 +441,7 @@ class Ticket(models.Model):
         return errors
     
     @classmethod
-    def new(cls, prize, ticket_code, quantity, type_ticket, user=None, event=None):
+    def new(cls, ticket_code, quantity, type_ticket, user=None, event=None):
         errors = cls.validate(ticket_code, quantity,type_ticket,user,event)
 
         if len(errors.keys()) > 0:
@@ -441,7 +452,6 @@ class Ticket(models.Model):
             quantity=quantity,
             type_ticket=type_ticket,
             user=user,
-            event=event,
-            prize=prize
+            event=event
         )
         return True, None
