@@ -1,10 +1,32 @@
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
 from .models import Event, Notification, Category, Ticket
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+
+class CompraExitosaView(View):
+    template_name='app/confirmar_compra.html'
+    context_objetct_name='compra_exitosa'
+
+    def get(self, request, event_id):
+        event = get_object_or_404(Event, pk=event_id)
+        return render(request, "app/confirmar_compra.html", {"event": event})
+    
+
+class ComprarTicketView(View):
+    template_name="app/compratickets.html"
+    context_object_name = "comprar_ticket"
+    def get(self, request, event_id):
+        event = get_object_or_404(Event, pk=event_id)
+        return render(request, "app/compratickets.html", {"event": event})
+
+    def post(self, request, event_id):
+        event = get_object_or_404(Event, pk=event_id)
+        # Acá iría la lógica de registrar la compra, guardar ticket, etc.
+        return redirect('comprar_ticket', event_id=event.id)  
+
 
 class LoginView(TemplateView):
     template_name = "app/login.html"

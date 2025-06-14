@@ -13,8 +13,10 @@ from .views import (
     LogoutView,
 
 )
+from app import views
 
 urlpatterns = [
+    path('comprar/<int:event_id>/', views.ComprarTicketView.as_view(), name='comprar_ticket'),
     path("", HomeView.as_view(), name="home"),
     path("events/", EventListView.as_view(), name="events"),
     path("events/<int:pk>/", EventDetailView.as_view(), name="event_detail"),

@@ -2,13 +2,88 @@
 
 {% block content %}
 
-<div class="container">
-    <h2>Registro</h2>
-    <form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Registrarse</button>
-    </form>
+<style>
+    body {
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+        min-height: 100vh;
+    }
+
+    .register-container {
+        max-width: 500px;
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="register-container">
+        <h2 class="text-center mb-4">Registro</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Campo de Nombre de Usuario -->
+            <div class="mb-3">
+                <label for="id_username" class="form-label">
+                    <i class="bi bi-person-circle me-2"></i>Nombre de usuario
+                </label>
+                <input type="text" name="username" class="form-control form-control-lg"
+                       id="id_username" value="{{ form.username.value|default:'' }}" required>
+                {% if form.username.errors %}
+                    <div class="text-danger small">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Campo de Email -->
+            <div class="mb-3">
+                <label for="id_email" class="form-label">
+                    <i class="bi bi-envelope-fill me-2"></i>Email
+                </label>
+                <input type="email" name="email" class="form-control form-control-lg"
+                       id="id_email" value="{{ form.email.value|default:'' }}" required>
+                {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Campo de Contraseña -->
+            <div class="mb-3">
+                <label for="id_password1" class="form-label">
+                    <i class="bi bi-lock-fill me-2"></i>Contraseña
+                </label>
+                <input type="password" name="password1" class="form-control form-control-lg"
+                       id="id_password1" required>
+                {% if form.password1.errors %}
+                    <div class="text-danger small">{{ form.password1.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div class="mb-3">
+                <label for="id_password2" class="form-label">
+                    <i class="bi bi-lock me-2"></i>Confirmar contraseña
+                </label>
+                <input type="password" name="password2" class="form-control form-control-lg"
+                       id="id_password2" required>
+                {% if form.password2.errors %}
+                    <div class="text-danger small">{{ form.password2.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Botón -->
+            <button type="submit" class="btn btn-success w-100 mt-3">
+                <i class="bi bi-person-plus-fill me-1"></i> Registrarse
+            </button>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

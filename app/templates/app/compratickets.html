@@ -1,0 +1,39 @@
+{% extends "base.html" %}   
+
+{% block content %}
+    {% if request.user.is_anonymous %}
+        <div class="container text-center mt-5">
+            <h2>Iniciá sesión para comprar ticket</h2>
+            <a href="{% url 'login' %}" class="btn btn-outline-primary mt-3">Iniciar Sesión</a>
+        </div>
+    {% elif request.user.is_authenticated %}
+        <div class="container text-center mt-5">
+            <div class="container mt-3">
+                <h2 class="text-center">Completa tu compra</h2>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo de entrada</label>
+                        <select class="form-select w-50 mx-auto" id="tipo" name="tipo">
+                            <option value="general">General - ${{ event.prize }}</option>
+                            <option value="vip">VIP - ${{ event.precio_vip }}</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3 w-50 mx-auto">
+                        <label for="cantidad" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" value="1" required>
+                    </div>
+                    
+                    <form action="{% url 'comprar_ticket' event.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Confirmar compra</button>
+                </form>
+            </div>
+
+            <p>Gracias por tu compra, {{ request.user.username }}.</p>
+            <a href="{% url 'events' %}" class="btn btn-primary mt-3">Ver más eventos</a>
+        </div>
+    {% endif %}
+{% endblock %}  

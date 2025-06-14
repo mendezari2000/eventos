@@ -29,6 +29,15 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="text-end mt-4">
+                        <form action="{% url 'comprar_ticket' event.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cart"></i> Comprar Entradas
+                        </button>
+                    </form>
+                </div>
 
             </div>
         </div>

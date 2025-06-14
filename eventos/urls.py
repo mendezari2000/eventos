@@ -16,9 +16,10 @@ Including another URLconf
 """
 
 from django.urls import include, path
-
+from django.contrib import admin
 from app.views import NotificationListView, TicketListView
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path("", include("app.urls"))
 ]
