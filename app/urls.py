@@ -3,6 +3,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 
 from django.contrib import admin
 from .views import (
+    CompraExitosaView,
     HomeView,
     EventListView,
     EventDetailView,
@@ -16,6 +17,7 @@ from .views import (
 from app import views
 
 urlpatterns = [
+    path('compra-exitosa/<int:event_id>/', CompraExitosaView.as_view(), name='compra_exitosa'),
     path('comprar/<int:event_id>/', views.ComprarTicketView.as_view(), name='comprar_ticket'),
     path("", HomeView.as_view(), name="home"),
     path("events/", EventListView.as_view(), name="events"),

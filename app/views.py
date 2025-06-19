@@ -8,11 +8,14 @@ from django.contrib.auth import authenticate, login, logout
 
 class CompraExitosaView(View):
     template_name='app/confirmar_compra.html'
-    context_objetct_name='compra_exitosa'
+    context_object_name='compra_exitosa'
 
     def get(self, request, event_id):
         event = get_object_or_404(Event, pk=event_id)
         return render(request, "app/confirmar_compra.html", {"event": event})
+    
+    def post(self, request, event_id):
+        return redirect('compra_exitosa', event_id=event_id)  # Redirige a la vista de compra exitosa
     
 
 class ComprarTicketView(View):
@@ -25,7 +28,8 @@ class ComprarTicketView(View):
     def post(self, request, event_id):
         event = get_object_or_404(Event, pk=event_id)
         # Acá iría la lógica de registrar la compra, guardar ticket, etc.
-        return redirect('comprar_ticket', event_id=event.id)  
+
+        return redirect('comprar_ticket', event_id=event.id)
 
 
 class LoginView(TemplateView):
@@ -74,7 +78,7 @@ class TicketListView(ListView):
     context_object_name = "tickets"    
 
     def get_queryset(self):
-        queryset = Ticket.objects.all().order_by("buy_date")
+        queryset = Ticket.objects.filter(user=self.request.user).order_by("buy_date")
         for ticket in queryset:
             ticket.total = ticket.prize * ticket.quantity
         return queryset
