@@ -17,6 +17,7 @@ class CompraExitosaView(View):
         return render(request, "app/confirmar_compra.html", {"event": event})
     
     def post(self, request, event_id):
+<<<<<<< HEAD
         event = get_object_or_404(Event, pk=event_id)
         tipo = request.POST.get("tipo")
         cantidad_str = request.POST.get("cantidad")  # puede venir como string vacío
@@ -45,6 +46,10 @@ class CompraExitosaView(View):
             event=event
         )
         return redirect('compra_exitosa', event_id=event_id)
+=======
+        return redirect('compra_exitosa', event_id=event_id)  # Redirige a la vista de compra exitosa
+    
+>>>>>>> 02690002dc5ccd6f7d4c57de2b103760e6c81610
 
 class ComprarTicketView(View):
     template_name="app/compratickets.html"
@@ -54,8 +59,15 @@ class ComprarTicketView(View):
         return render(request, "app/compratickets.html", {"event": event})
 
     def post(self, request, event_id):
+<<<<<<< HEAD
         event = get_object_or_404(Event, pk=event_id)       
         return redirect('comprar_ticket', event_id=event.id)  
+=======
+        event = get_object_or_404(Event, pk=event_id)
+        # Acá iría la lógica de registrar la compra, guardar ticket, etc.
+
+        return redirect('comprar_ticket', event_id=event.id)
+>>>>>>> 02690002dc5ccd6f7d4c57de2b103760e6c81610
 
 
 class LoginView(TemplateView):
