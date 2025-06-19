@@ -1,3 +1,5 @@
+import uuid
+from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
 from .models import Event, Notification, Category, Ticket
@@ -8,12 +10,41 @@ from django.contrib.auth import authenticate, login, logout
 
 class CompraExitosaView(View):
     template_name='app/confirmar_compra.html'
-    context_objetct_name='compra_exitosa'
+    context_object_name='compra_exitosa'
 
     def get(self, request, event_id):
         event = get_object_or_404(Event, pk=event_id)
         return render(request, "app/confirmar_compra.html", {"event": event})
     
+    def post(self, request, event_id):
+        event = get_object_or_404(Event, pk=event_id)
+        tipo = request.POST.get("tipo")
+        cantidad_str = request.POST.get("cantidad")  # puede venir como string vacío
+
+        errors = {}
+
+        
+        try:
+            cantidad = int(cantidad_str) if cantidad_str else 1
+        except ValueError:
+            errors["cantidad"] = "Cantidad inválida"
+            return render(request, self.template_name, {
+                "event": event,
+                "errors": errors,
+                "tipo": tipo,
+                "cantidad": cantidad_str
+            })
+
+        ticket_code = str(uuid.uuid4())[:8]
+
+        Ticket.objects.create(
+            ticket_code=ticket_code,
+            quantity=cantidad,  
+            type_ticket=tipo,
+            user=request.user,
+            event=event
+        )
+        return redirect('compra_exitosa', event_id=event_id)
 
 class ComprarTicketView(View):
     template_name="app/compratickets.html"
@@ -23,8 +54,7 @@ class ComprarTicketView(View):
         return render(request, "app/compratickets.html", {"event": event})
 
     def post(self, request, event_id):
-        event = get_object_or_404(Event, pk=event_id)
-        # Acá iría la lógica de registrar la compra, guardar ticket, etc.
+        event = get_object_or_404(Event, pk=event_id)       
         return redirect('comprar_ticket', event_id=event.id)  
 
 
@@ -74,7 +104,7 @@ class TicketListView(ListView):
     context_object_name = "tickets"    
 
     def get_queryset(self):
-        queryset = Ticket.objects.all().order_by("buy_date")
+        queryset = Ticket.objects.filter(user=self.request.user).order_by("buy_date")
         for ticket in queryset:
             ticket.total = ticket.prize * ticket.quantity
         return queryset

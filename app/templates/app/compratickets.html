@@ -10,7 +10,7 @@
         <div class="container text-center mt-5">
             <div class="container mt-3">
                 <h2 class="text-center">Completa tu compra</h2>
-                <form method="post" action="">
+                <form method="post" action="{% url 'compra_exitosa' event.id %}">
                     {% csrf_token %}
                     
                     <div class="mb-3">
@@ -26,8 +26,8 @@
                         <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" value="1" required>
                     </div>
                     
-                    <form action="{% url 'comprar_ticket' event.id %}" method="post">
-                    {% csrf_token %}
+                    <!--<form action="{% url 'comprar_ticket' event.id %}" method="post">
+                    {% csrf_token %}-->
                     <button type="submit" class="btn btn-success">Confirmar compra</button>
                 </form>
             </div>

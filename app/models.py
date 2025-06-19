@@ -412,6 +412,8 @@ class Ticket(models.Model):
         max_length=7,
         choices=Type_Ticket.choices,
         default=Type_Ticket.GENERAL)
+    prize = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='tickets')
     event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='tickets')
 
@@ -454,4 +456,5 @@ class Ticket(models.Model):
             user=user,
             event=event
         )
+        print("ticket guardado")
         return True, None
