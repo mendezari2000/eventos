@@ -3,6 +3,29 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<style> /* Colores para algunos mensajes, como los de reembolso pendiente, etc */
+  .texto-no-disponible {
+    color: #777777; 
+  }
+
+  .texto-en-proceso {
+    color: forestgreen;
+  }
+  
+  .btn-negro {
+    background-color: #ffff;  
+    color: #000000;            
+    font-weight: bold;          
+    border: none;
+    padding: 5px 10px;
+    border-radius: 1px;         
+    cursor: default;            
+  }
+  
+  .btn-negro:hover {
+    background-color: forestgreen;
+  }
+</style>
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Eventos{% endblock %}</title>

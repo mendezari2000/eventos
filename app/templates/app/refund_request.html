@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>Solicitud de reembolso</h2>
+    <p><strong>Ticket:</strong> {{ ticket.ticket_code }}</p>
+    <p><strong>Evento:</strong> {{ ticket.event.title }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class= "btn btn-primary">Enviar solicitud de reembolso</button>
+    </form>
+</div>
+{% endblock %}

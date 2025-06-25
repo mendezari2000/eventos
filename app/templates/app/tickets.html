@@ -13,10 +13,12 @@
                 <th>Fecha de compra</th>
                 <th>Código</th>
                 <th>Evento</th>
+                <th>Fecha del evento</th>
                 <th>Tipo</th>
                 <th>Cantidad</th>
                 <th>Precio por unidad</th>
                 <th>Precio total</th>
+                <th>Reembolso</th>
             </tr>
         </thead>
         <tbody>
@@ -25,11 +27,22 @@
                     <td>{{ ticket.buy_date}}</td>
                     <td>{{ ticket.ticket_code }}</td>
                     <td>{{ ticket.event.title }}</td>
+                    <td>{{ ticket.event.date }}</td>
                     <td>{{ ticket.type_ticket }}</td>
                     <td>{{ticket.quantity}}</td>
                     <td>{{ticket.prize}}</td>
                     <td>{{ticket.total}}</td>
-
+                    <td>
+                        {% if ticket.event.date <= now %}
+                            {% if ticket.refund_pending %}
+                                <span class="texto-en-proceso">Estamos revisando tu solicitud.</span>
+                            {% else %}                              
+                                <a href="{% url 'refund_request' ticket.id %}" class="btn btn-primary">Solicitar Reembolso</a>
+                            {% endif %}
+                        {% else %}
+                            <span class="texto-no-disponible">Podés pedir el reembolso despues del evento.</span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% empty %}
                 <tr>

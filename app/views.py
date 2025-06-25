@@ -2,11 +2,17 @@ import uuid
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
-from .models import Event, Notification, Category, Ticket, User
+from .models import Event, Notification, Category, Ticket, User, RefundRequest
 from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic.edit import FormView
+from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.utils import timezone
+from .forms import RefundRequestForm
 
 class CompraExitosaView(View):
     template_name='app/confirmar_compra.html'
@@ -37,10 +43,19 @@ class CompraExitosaView(View):
 
         ticket_code = str(uuid.uuid4())[:8]
 
+
+        precio_unitario = event.prize
+        if tipo == "VIP":
+            precio_unitario = event.precio_vip
+
+        total = precio_unitario * cantidad
+
         Ticket.objects.create(
             ticket_code=ticket_code,
             quantity=cantidad,  
             type_ticket=tipo,
+            prize=precio_unitario,
+            total=total,
             user=request.user,
             event=event
         )
@@ -108,6 +123,19 @@ class TicketListView(ListView):
         for ticket in queryset:
             ticket.total = ticket.prize * ticket.quantity
         return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # esto es para mostrar el boton de reembolso solo si el evento ya pasó
+        context['now'] = timezone.now()
+        # esto es para mostrar el boton solo si hay una solicitud de reembolso pendiente
+        for ticket in context['tickets']:
+            ticket.refund_pending = RefundRequest.objects.filter(
+                ticket_code=ticket.ticket_code, 
+                approval_date__isnull=True
+            ).exists()
+        return context
+
 
 
 class NotificationListView(ListView):
@@ -152,3 +180,46 @@ class ProfileView(TemplateView):
         context['tickets'] = Ticket.objects.filter(user=self.request.user).order_by("buy_date")
         return context
 
+
+class RefundRequestView(LoginRequiredMixin, FormView):
+    template_name = "app/refund_request.html"
+    form_class = RefundRequestForm
+    success_url = reverse_lazy('tickets')
+
+    def dispatch(self, request, *args, **kwargs):
+        # busco el ticket
+        self.ticket = get_object_or_404(Ticket, id=kwargs.get('ticket_id'))
+        
+        # verifico si el ticket es del ussuario
+        if self.ticket.user != request.user:
+            messages.error(request, "No tenés permiso para solicitar reembolso de este ticket.")
+            return redirect('tickets')
+        
+        # segun el enunciado, el evento tiene que haber ocurrido para poder solicitar el reembolso
+        if self.ticket.event.date > timezone.now():
+            messages.error(request, "El evento aún no ha ocurrido. No se puede solicitar reembolso.")
+            return redirect('tickets')
+        
+        # verifico si ya se solicitó el reembolso
+        if RefundRequest.objects.filter(ticket_code=self.ticket.ticket_code, approval_date__isnull=True).exists():
+            messages.error(request, "Ya existe una solicitud de reembolso pendiente para este ticket.")
+            return redirect('tickets')
+        
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        reason = form.cleaned_data.get('reason').strip()
+        success, errors = RefundRequest.new(self.request.user, self.ticket.ticket_code, reason)
+        
+        if not success:
+            for error in errors.values():
+                form.add_error(None, error)
+            return self.form_invalid(form)
+        
+        messages.success(self.request, "Enviaste la solicitud de reembolso.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ticket'] = self.ticket 
+        return context

@@ -1,6 +1,5 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
-
 from django.contrib import admin
 from .views import (
     CompraExitosaView,
@@ -12,6 +11,7 @@ from .views import (
     RegisterView,
     ProfileView,
     LogoutView,
+    RefundRequestView,
 
 )
 from app import views
@@ -31,4 +31,5 @@ urlpatterns = [
     path("accounts/profile/", ProfileView.as_view(), name="profile"),
     path('events/<int:pk>/buy/', EventDetailView.as_view(), name='buy_ticket'),
     path('admin/', admin.site.urls),
+    path('tickets/<int:ticket_id>/refund/', RefundRequestView.as_view(), name='refund_request'),
 ]
