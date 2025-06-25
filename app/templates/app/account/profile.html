@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2>¡Bienvenido/a, {{ user.username }}!</h2>
-  <p>Acá podrías ver tus eventos, entradas, comentarios, etc.</p>
+  <h2>Datos de tu cuenta</h2>
+  <p>Usuario: {{user.username}}</p>
+  <p>Mail: {{user.email}}</p>
 </div>
+<div class="mt-4">
+  <a href="{% url 'tickets' %}" class="btn btn-primary">Ver mis tickets</a>
+</div>
+
+
 {% endblock %}

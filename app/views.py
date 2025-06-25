@@ -2,7 +2,7 @@ import uuid
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
-from .models import Event, Notification, Category, Ticket
+from .models import Event, Notification, Category, Ticket, User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm
@@ -17,7 +17,6 @@ class CompraExitosaView(View):
         return render(request, "app/confirmar_compra.html", {"event": event})
     
     def post(self, request, event_id):
-<<<<<<< HEAD
         event = get_object_or_404(Event, pk=event_id)
         tipo = request.POST.get("tipo")
         cantidad_str = request.POST.get("cantidad")  # puede venir como string vacío
@@ -46,10 +45,6 @@ class CompraExitosaView(View):
             event=event
         )
         return redirect('compra_exitosa', event_id=event_id)
-=======
-        return redirect('compra_exitosa', event_id=event_id)  # Redirige a la vista de compra exitosa
-    
->>>>>>> 02690002dc5ccd6f7d4c57de2b103760e6c81610
 
 class ComprarTicketView(View):
     template_name="app/compratickets.html"
@@ -59,15 +54,8 @@ class ComprarTicketView(View):
         return render(request, "app/compratickets.html", {"event": event})
 
     def post(self, request, event_id):
-<<<<<<< HEAD
         event = get_object_or_404(Event, pk=event_id)       
         return redirect('comprar_ticket', event_id=event.id)  
-=======
-        event = get_object_or_404(Event, pk=event_id)
-        # Acá iría la lógica de registrar la compra, guardar ticket, etc.
-
-        return redirect('comprar_ticket', event_id=event.id)
->>>>>>> 02690002dc5ccd6f7d4c57de2b103760e6c81610
 
 
 class LoginView(TemplateView):
@@ -154,5 +142,13 @@ class EventDetailView(DetailView):
     context_object_name = "event"
 
 class ProfileView(TemplateView):
+    model = User
     template_name = "app/account/profile.html"
     context_object_name = "profile"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        context['tickets'] = Ticket.objects.filter(user=self.request.user).order_by("buy_date")
+        return context
+

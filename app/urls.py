@@ -17,11 +17,8 @@ from .views import (
 from app import views
 
 urlpatterns = [
-<<<<<<< HEAD
-     path('compra-exitosa/<int:event_id>/', CompraExitosaView.as_view(), name='compra_exitosa'),
-=======
+    path ('profile/', ProfileView.as_view(), name = 'profile'),
     path('compra-exitosa/<int:event_id>/', CompraExitosaView.as_view(), name='compra_exitosa'),
->>>>>>> 02690002dc5ccd6f7d4c57de2b103760e6c81610
     path('comprar/<int:event_id>/', views.ComprarTicketView.as_view(), name='comprar_ticket'),
     path("", HomeView.as_view(), name="home"),
     path("events/", EventListView.as_view(), name="events"),

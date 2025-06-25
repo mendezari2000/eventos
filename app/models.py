@@ -160,7 +160,7 @@ class Event(models.Model):
 
         self.save()
 
-"""//class User(models.Model):
+"""class User(models.Model):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
 
