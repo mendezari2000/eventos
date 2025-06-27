@@ -9,7 +9,18 @@
         <div>
     </div>
 </div>
-<div class='Categorias'>
-    
+    <div class="container mt-4">
+    <h4>Categorías:</h4>
+    <div class="d-flex flex-wrap gap-3">
+        {% for categoria in categories %}
+        <a href="{% url 'eventos_por_categoria' categoria.id %}" class="btn btn-outline-primary">
+            {{ categoria.name }}
+        </a>
+        {% empty %}
+        <p>No hay categorías disponibles.</p>
+        {% endfor %}
+    </div>
+    </div>
+
 </div>
 {% endblock content %}

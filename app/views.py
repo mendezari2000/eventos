@@ -1,3 +1,4 @@
+from urllib import request
 import uuid
 from django.urls import reverse
 from django.views import View
@@ -121,7 +122,30 @@ class NotificationListView(ListView):
 class HomeView(TemplateView):
     model = Category
     template_name = "home.html"
+    context_object_name = "categories"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.all()
+        return context
+
+
+class CategoryView(ListView):
+    model = Category
+    template_name = "app/category.html"
+    context_object_name = "eventos_por_categoria"
+    
+    def get_queryset(self):
+        category_id = self.kwargs['pk']
+        return Event.objects.filter(category_id=category_id)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["category"] = get_object_or_404(Category, pk=self.kwargs['pk'])
+        return context
+
+
+    
 
 class EventListView(ListView):
     model = Event
@@ -151,4 +175,6 @@ class ProfileView(TemplateView):
         context['user'] = self.request.user
         context['tickets'] = Ticket.objects.filter(user=self.request.user).order_by("buy_date")
         return context
+
+
 
