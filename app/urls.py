@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import admin
 from .views import (
+    CategoryView,
     CompraExitosaView,
     HomeView,
     EventListView,
@@ -17,10 +18,11 @@ from .views import (
 from app import views
 
 urlpatterns = [
+    path('category/<int:pk>/', CategoryView.as_view(), name = 'eventos_por_categoria'),
     path ('profile/', ProfileView.as_view(), name = 'profile'),
     path('compra-exitosa/<int:event_id>/', CompraExitosaView.as_view(), name='compra_exitosa'),
     path('comprar/<int:event_id>/', views.ComprarTicketView.as_view(), name='comprar_ticket'),
-    path("", HomeView.as_view(), name="home"),
+    path("", HomeView.as_view(), name="categories"),
     path("events/", EventListView.as_view(), name="events"),
     path("events/<int:pk>/", EventDetailView.as_view(), name="event_detail"),
     path("notificaciones/", NotificationListView.as_view(), name="notifications"),
