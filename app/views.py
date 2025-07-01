@@ -3,7 +3,7 @@ import uuid
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView, ListView, DetailView
-from .models import Event, Notification, Category, Ticket, User, RefundRequest
+from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
@@ -91,12 +91,12 @@ class LoginView(TemplateView):
         return render(request, self.template_name, {'form': form})
     
 class LogoutView(View):
-    template_name = "logout.html"
+    template_name = "home.html"
     context_object_name = "logout"
 
     def get(self, request, *args, **kwargs):
         logout(request)
-        return redirect('home')
+        return redirect('categories')
    
 class RegisterView(TemplateView):
     template_name = "app/register.html"
@@ -205,7 +205,6 @@ class ProfileView(TemplateView):
         return context
 
 
-<<<<<<< HEAD
 class RefundRequestView(LoginRequiredMixin, FormView):
     template_name = "app/refund_request.html"
     form_class = RefundRequestForm
@@ -248,6 +247,3 @@ class RefundRequestView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['ticket'] = self.ticket 
         return context
-=======
-
->>>>>>> b4f882f92934a4ab787eb357bf67c510990b43b8
