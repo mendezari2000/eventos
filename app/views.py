@@ -205,7 +205,6 @@ class ProfileView(TemplateView):
         return context
 
 
-<<<<<<< HEAD
 class RefundRequestView(LoginRequiredMixin, FormView):
     template_name = "app/refund_request.html"
     form_class = RefundRequestForm
@@ -248,6 +247,3 @@ class RefundRequestView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['ticket'] = self.ticket 
         return context
-=======
-
->>>>>>> b4f882f92934a4ab787eb357bf67c510990b43b8
