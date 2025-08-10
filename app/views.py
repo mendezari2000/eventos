@@ -15,6 +15,13 @@ from django.contrib import messages
 from django.utils import timezone
 from .forms import RefundRequestForm
 
+class CommentView(View):
+    model= Comment
+    template_name= 'app/event_detail.html'
+    context_object_name='comentarios'
+
+
+
 class CompraExitosaView(View):
     template_name='app/confirmar_compra.html'
     context_object_name='compra_exitosa'
@@ -192,6 +199,31 @@ class EventDetailView(DetailView):
     model = Event
     template_name = "app/event_detail.html"
     context_object_name = "event"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        event = self.get_object()
+        context["comments"] = event.comments.select_related('user').order_by('-created_at')
+        context["errors"] = kwargs.get("errors", {})
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()  
+        title = request.POST.get("title", "").strip()
+        text = request.POST.get("text", "").strip()
+
+        success, errors = Comment.new(
+            user=request.user,
+            event=self.object,
+            title=title,
+            text=text
+        )
+
+        if success:
+            return redirect("event_detail", pk=self.object.pk)
+
+        context = self.get_context_data(errors=errors)
+        return self.render_to_response(context)
 
 class ProfileView(TemplateView):
     model = User
