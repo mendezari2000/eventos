@@ -268,6 +268,8 @@ class Notification(models.Model):
 class RefundRequest (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
     approved = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False)
     approval_date = models.DateField(null=True, blank=True)
     ticket_code = models.CharField(max_length=100)
     reason = models.TextField()

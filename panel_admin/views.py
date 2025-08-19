@@ -143,13 +143,13 @@ class CommentListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
     template_name = "panel_admin/comment_confirm_delete.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         user = self.request.user
         comment = self.get_object()
         # Cliente puede eliminar sus propios comentarios, vendedor puede eliminar cualquiera
-        return comment.usuario == user or user.groups.filter(name="Vendedor").exists()
+        return comment.user == user or user.groups.filter(name="Vendedor").exists()
 
 # ------------------- TICKETS -------------------
 class TicketUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -188,7 +188,7 @@ from django.utils import timezone
 
 class RefundRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = RefundRequest
-    fields = ['approved']  # Solo permitimos cambiar aprobado o no
+    fields = []
     template_name = "panel_admin/refund_request_form.html"
     success_url = reverse_lazy('panel_admin:refunds_list')
 
@@ -198,25 +198,33 @@ class RefundRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
 
     def form_valid(self, form):
         refund = form.instance
-        was_approved_before = refund.approved  # Estado anterior
+        decision = self.request.POST.get('decision')
 
-        # Si se aprueba ahora y no tiene fecha de aprobación, la ponemos
-        if form.cleaned_data['approved'] and not refund.approval_date:
-            refund.approval_date = timezone.now().date()
-        
-        # Guardar primero el reembolso
-        response = super().form_valid(form)
-
-        # Si antes no estaba aprobado y ahora sí → enviar notificación
-        if not was_approved_before and refund.approved:
+        if decision == 'approve':
+            refund.approved = True
+            refund.approval_date = timezone.now()
+            refund.rejected = False
+            refund.resolved = True
             Notification.new(
-                title="Solicitud de reembolso aprobada",
-                message=f"Tu solicitud de reembolso con código {refund.ticket_code} ha sido aprobada.",
-                priority=riority.LOW,
-                users=[refund.user]  # lista de usuarios que recibirán la notificación
+                title='Solicitud de Reembolso Aprobada',
+                message=f'Su solicitud de reembolso para el ticket {refund.ticket_code} ha sido aprobada.',
+                users=refund.user,
+                priority='Notification.LOW',
             )
+        elif decision == 'reject':
+            refund.approved = False
+            refund.rejected = True
+            refund.resolved = True
+            Notification.new(
+                title='Solicitud de Reembolso Rechazada',
+                message=f'Su solicitud de reembolso para el ticket {refund.ticket_code} ha sido rechazada.',
+                users=[refund.user],
+                priority='Notification.LOW',
+            )
+        else:
+            refund.resolved = False  # Si no se toma ninguna decisión, no se resuelve
 
-        return response
+        return super().form_valid(form)
 
 # ------------------- NOTIFICATIONS -------------------
 class NotificationListView(LoginRequiredMixin, UserPassesTestMixin, ListView):

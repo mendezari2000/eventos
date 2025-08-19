@@ -2,7 +2,7 @@ from urllib import request
 import uuid
 from django.urls import reverse
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, DeleteView
+from django.views.generic import TemplateView, ListView, DetailView, DeleteView, View
 from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic.edit import FormView
@@ -19,8 +19,6 @@ class CommentView(View):
     model= Comment
     template_name= 'app/event_detail.html'
     context_object_name='comentarios'
-
-
 
 class CompraExitosaView(View):
     template_name='app/confirmar_compra.html'
@@ -138,10 +136,17 @@ class TicketListView(ListView):
         context['now'] = timezone.now()
         # esto es para mostrar el boton solo si hay una solicitud de reembolso pendiente
         for ticket in context['tickets']:
-            ticket.refund_pending = RefundRequest.objects.filter(
-                ticket_code=ticket.ticket_code, 
-                approval_date__isnull=True
-            ).exists()
+            refund = RefundRequest.objects.filter(ticket_code=ticket.ticket_code).order_by('-created_at').first()
+            if refund:
+                if refund.resolved:
+                    if refund.approved:
+                        ticket.refund_status = "Tu reembolso fue aprobado."
+                    elif refund.rejected:
+                        ticket.refund_status = "Tu reembolso fue rechazado."
+                else:
+                    ticket.refund_pending = True
+            else:
+                ticket.refund_pending = False
         return context
 
 
@@ -249,6 +254,10 @@ class RefundRequestView(LoginRequiredMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         # busco el ticket
         self.ticket = get_object_or_404(Ticket, id=kwargs.get('ticket_id'))
+
+        if RefundRequest.objects.filter(ticket_code=self.ticket.ticket_code, resolved=True).exists():
+            messages.error(request, "Ya se ha resuelto una solicitud de reembolso para este ticket.")
+            return redirect('tickets')
         
         # verifico si el ticket es del ussuario
         if self.ticket.user != request.user:
@@ -284,11 +293,6 @@ class RefundRequestView(LoginRequiredMixin, FormView):
         context['ticket'] = self.ticket 
         return context
     
-    from django.views.generic import View
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib import messages
-
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Comment
     template_name = "app/comment_confirm_delete.html"

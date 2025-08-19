@@ -10,7 +10,12 @@
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+   <label>
+        <input type="radio" name="decision" value="approve" {% if object.approved %}checked{% endif %}> Aprobar
+    </label>
+    <label>
+        <input type="radio" name="decision" value="reject" {% if object.rejected %}checked{% endif %}> Rechazar
+    </label>
     <button type="submit" class="btn btn-success">Guardar</button>
     <a href="{% url 'panel_admin:refunds_list' %}" class="btn btn-secondary">Cancelar</a>
 </form>

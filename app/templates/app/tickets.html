@@ -34,9 +34,11 @@
                     <td>{{ticket.total}}</td>
                     <td>
                         {% if ticket.event.date <= now %}
-                            {% if ticket.refund_pending %}
+                            {% if ticket.refund_status %}
+                                <span>{{ ticket.refund_status }}</span>
+                            {% elif ticket.refund_pending %}
                                 <span class="texto-en-proceso">Estamos revisando tu solicitud.</span>
-                            {% else %}                              
+                            {% else %}
                                 <a href="{% url 'refund_request' ticket.id %}" class="btn btn-primary">Solicitar Reembolso</a>
                             {% endif %}
                         {% else %}

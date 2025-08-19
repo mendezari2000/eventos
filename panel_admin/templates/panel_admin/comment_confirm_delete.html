@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>¿Eliminar comentario "{{ object.title }}"?</h1>
+    <h2>
+        Comentario: "{{ object.text }}"<br>
+        <strong>Usuario:</strong> {{ object.user.username }}<br>
+    </h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar</button>
+    <a href="{% url 'panel_admin:admin_dashboard' %}">Cancelar</a>
+</form>
+{% endblock %}

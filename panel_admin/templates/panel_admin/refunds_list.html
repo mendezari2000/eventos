@@ -22,13 +22,14 @@
             <td>{{ refund.reason }}</td>
             <td>{{ refund.created_at }}</td>
             <td>
-              {% if not refund.approved %}
-              <a href="{% url 'panel_admin:refund_update' refund.pk %}" class="btn btn-warning">
-                Resolver
-            </a>
-        {% else %}
-            <span class="badge bg-success">Resuelto</span>
-        {% endif %}
+                {% if not refund.resolved %}
+                    <a href="{% url 'panel_admin:refund_update' refund.pk %}" class="btn btn-warning">
+                        Resolver
+                    </a>
+                {% else %}
+                    <span class="badge bg-success">Resuelto</span>
+                {% endif %}
+            </td>
         </tr>
         {% empty %}
         <tr>
