@@ -13,14 +13,14 @@ class Venue (models.Model):
         return f"{self.name} - {self.city}"
 
     @classmethod
-    def validate (cls, name, adress, city, capacity, contact):
+    def validate (cls, name, address, city, capacity, contact):
         errors = {}
 
         if name == "":
             errors["name"] = "El lugar debe tener un nombre"
         
-        if adress == "":
-            errors["adress"] = "El lugar debe tener una dirección"
+        if address == "":
+            errors["address"] = "El lugar debe tener una dirección"
         
         if city == "":
             errors["city"] = "El lugar debe tener una ciudad"
@@ -34,15 +34,15 @@ class Venue (models.Model):
         return errors
     
     @classmethod
-    def new(cls, name, adress, city, capacity, contact):
-        errors = Venue.validate(name, adress, city, capacity, contact)
+    def new(cls, name, address, city, capacity, contact):
+        errors = Venue.validate(name, address, city, capacity, contact)
 
         if len(errors.keys()) > 0:
             return False, errors
         
         Venue.objects.create(
             name=name,
-            address=adress,
+            address=address,
             city=city,
             capacity=capacity,
             contact=contact
@@ -249,6 +249,7 @@ class Notification(models.Model):
             priority=priority
         )
         
+        notification.save
         notification.users.set(users)
 
         return True, None
@@ -283,7 +284,7 @@ class RefundRequest (models.Model):
         if reason == "":
             errors["reason"] = "El motivo de la solicitud es obligatorio"
 
-        if user == "":
+        if not user:
             errors["user"] = "El usuario de la solicitud es obligatorio"   
         
         return errors

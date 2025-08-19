@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Gestión de Categorías</h1>
+<a href="{% url 'panel_admin:category_add' %}">+ Crear nueva categoría</a>
+<ul>
+    {% for category in categories %}
+        <li>
+        {{ category.name }}
+        <a href="{% url 'panel_admin:category_edit' category.pk %}">Editar</a>
+        <a href="{% url 'panel_admin:category_delete' category.pk %}">Borrar</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

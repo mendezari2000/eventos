@@ -2,7 +2,7 @@ from urllib import request
 import uuid
 from django.urls import reverse
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, DeleteView
 from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic.edit import FormView
@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.utils import timezone
 from .forms import RefundRequestForm
@@ -152,7 +152,10 @@ class NotificationListView(ListView):
     context_object_name = "notifications"
 
     def get_queryset(self):
-        return Notification.objects.all().order_by("priority")
+        user = self.request.user
+        # Solo las notificaciones asignadas a este usuario
+        return Notification.objects.filter(users=user).order_by("priority", "-created_at")
+
 
 class HomeView(TemplateView):
     model = Category
@@ -205,6 +208,7 @@ class EventDetailView(DetailView):
         event = self.get_object()
         context["comments"] = event.comments.select_related('user').order_by('-created_at')
         context["errors"] = kwargs.get("errors", {})
+        context["is_vendedor"] = self.request.user.groups.filter(name="Vendedor").exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -279,3 +283,20 @@ class RefundRequestView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['ticket'] = self.ticket 
         return context
+    
+    from django.views.generic import View
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = "app/comment_confirm_delete.html"
+    
+    # Redirige al mismo evento después de borrar
+    def get_success_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
+    
+    def test_func(self):
+        # Solo vendedores pueden borrar cualquier comentario
+        return self.request.user.groups.filter(name="Vendedor").exists()

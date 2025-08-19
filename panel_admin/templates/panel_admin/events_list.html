@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Gestión de Eventos</h1>
+<a href="{% url 'panel_admin:event_add' %}">+ Crear nuevo evento</a>
+<ul>
+  {% for event in events %}
+    <li>
+      {{ event.title }} - {{ event.date }}
+      <a href="{% url 'panel_admin:event_edit' event.pk %}">Editar</a>
+      <a href="{% url 'panel_admin:event_delete' event.pk %}">Borrar</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

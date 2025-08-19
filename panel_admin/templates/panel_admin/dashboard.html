@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Panel de administración</h2>
+
+{% if es_admin %}
+  <h3>Eventos</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:events_list' %}">Gestionar Eventos</a>
+
+  <h3>Categorías</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:categories_list' %}">Gestionar Categorías</a>
+
+  <h3>Lugares</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:venues_list' %}">Gestionar Lugares</a>
+
+  <h3>Notificaciones</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:notifications_list' %}">Gestionar Notificaciones</a>
+
+{% elif es_vendedor %}
+  <h3>Tickets y Comentarios</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:refunds_list' %}">Solicitudes de reembolso</a>
+  <a class="btn btn-primary" href="{% url 'panel_admin:comments_list' %}">Comentarios</a>
+
+{% else %}
+  <p>No tenés permisos especiales. Volvé a la <a href="/">página principal</a>.</p>
+{% endif %}
+{% endblock %}

@@ -53,10 +53,19 @@
         <small class="text-muted">{{ comment.created_at|date:"d/m/Y H:i" }}</small>
         <h6 class="mt-2">{{ comment.title }}</h6>
         <p>{{ comment.text }}</p>
+
+        {% if is_vendedor %}
+            <form action="{% url 'comment_delete' comment.id %}" method="post" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+            </form>
+        {% endif %}
     </div>
 {% empty %}
     <p>No hay comentarios aún.</p>
 {% endfor %}
+
+
 
 <hr class="my-4">
 
