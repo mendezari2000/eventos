@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %} Confirmar Eliminación de Notificación {% endblock %}
+{% block content %}
+<h1>¿Eliminar notificación "{{ object.title }}"?</h1>
+<form method="post">
+    {% csrf_token %}
+    <p>Esta acción eliminará la notificación seleccionada.</p>
+    <button type="submit">Confirmar</button>
+    <a href="{% url 'panel_admin:notifications_list' %}">Cancelar</a>
+</form>
+{% endblock %}

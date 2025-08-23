@@ -127,7 +127,7 @@ class VenueUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class VenueDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Venue
     template_name = "panel_admin/venue_confirm_delete.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()
@@ -208,20 +208,20 @@ class RefundRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
             refund.rejected = False
             refund.resolved = True
             Notification.new(
-                title='Solicitud de Reembolso Aprobada',
-                message=f'Su solicitud de reembolso para el ticket {refund.ticket_code} ha sido aprobada.',
-                users=refund.user,
-                priority='Notification.LOW',
+                title='Solicitud de Reembolso',
+                message=f'Tu solicitud de reembolso para el ticket "{refund.ticket_code}" ha sido aprobada.',
+                users=[refund.user],
+                priority='HIGH',
             )
         elif decision == 'reject':
             refund.approved = False
             refund.rejected = True
             refund.resolved = True
             Notification.new(
-                title='Solicitud de Reembolso Rechazada',
-                message=f'Su solicitud de reembolso para el ticket {refund.ticket_code} ha sido rechazada.',
+                title='Solicitud de Reembolso',
+                message=f'Tu solicitud de reembolso para el ticket "{refund.ticket_code}" ha sido rechazada.',
                 users=[refund.user],
-                priority='Notification.LOW',
+                priority='HIGH',
             )
         else:
             refund.resolved = False  # Si no se toma ninguna decisión, no se resuelve
@@ -232,24 +232,25 @@ class RefundRequestUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVie
 class NotificationListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Notification
     template_name = "panel_admin/notifications_list.html"
+    context_object_name = 'notifications'
 
     def test_func(self):
         return self.request.user.groups.filter(name__in=["Administrador","Vendedor"]).exists()
 
 class NotificationCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Notification
-    fields = ['titulo','mensaje']
+    fields = ['title','message','priority','users']
     template_name = "panel_admin/notification_form.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()
 
 class NotificationUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Notification
-    fields = ['titulo','mensaje']
+    fields = ['title','message','priority','users']
     template_name = "panel_admin/notification_form.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()
@@ -257,7 +258,7 @@ class NotificationUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 class NotificationDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Notification
     template_name = "panel_admin/notification_confirm_delete.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()

@@ -21,6 +21,11 @@
   <a class="btn btn-primary" href="{% url 'panel_admin:refunds_list' %}">Solicitudes de reembolso</a>
   <a class="btn btn-primary" href="{% url 'panel_admin:comments_list' %}">Comentarios</a>
 
+{% elif request.user.is_anonymous %}
+  <div class="container text-center mt-5">
+    <h2>Iniciá sesión para ingresar al panel</h2>
+      <a href="{% url 'login' %}" class="btn btn-outline-primary mt-3">Iniciar Sesión</a>
+  </div>
 {% else %}
   <p>Este sitio es solo para administradores o vendedores. Volvé a la <a href="/">página principal</a>.</p>
 {% endif %}
