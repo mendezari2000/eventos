@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from app.models import Event, Category, Venue, Comment, Ticket, RefundRequest, Notification
@@ -12,7 +13,7 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         return self.request.user.groups.filter(name__in=["Administrador", "Vendedor"]).exists()
     
     def handle_no_permission(self):
-        return redirect('/')  # Redirige al home si no tiene permisos
+        return render(self.request, self.template_name, {'es_admin': False, 'es_vendedor': False})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -91,7 +92,7 @@ class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Category
     template_name = "panel_admin/category_confirm_delete.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()
@@ -100,24 +101,25 @@ class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class VenueListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Venue
     template_name = "panel_admin/venues_list.html"
+    context_object_name = 'venues'
 
     def test_func(self):
         return self.request.user.groups.filter(name__in=["Administrador","Vendedor"]).exists()
 
 class VenueCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Venue
-    fields = ['nombre','direccion']
+    fields = ['name','address', 'city', 'capacity', 'contact']
     template_name = "panel_admin/venue_form.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()
 
 class VenueUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Venue
-    fields = ['nombre','direccion']
+    fields = ['name','address', 'city', 'capacity', 'contact']
     template_name = "panel_admin/venue_form.html"
-    success_url = reverse_lazy('admin_dashboard')
+    success_url = reverse_lazy('panel_admin:admin_dashboard')
 
     def test_func(self):
         return self.request.user.groups.filter(name="Administrador").exists()
