@@ -389,7 +389,7 @@ class Rating(models.Model):
     
     @classmethod 
     def new (cls, title, text, rating, user=None, event=None):
-        errors = Rating.validate(title, text, rating);
+        errors = Rating.validate(title, text, rating, user, event);
 
         if len(errors.keys()) > 0:
             return False, errors
@@ -425,11 +425,8 @@ class Ticket(models.Model):
     
     
     @classmethod
-    def validate(cls, ticket_code, quantity, type_ticket, user, event):
+    def validate(cls, quantity, type_ticket, user, event):
         errors={}
-
-        if ticket_code =="":
-            errors["ticket_code"] = "El codigo del ticket es obligatorio"
         
         if quantity<0:
             errors["quantity"] = "Debe ingresar una cantidad valida"
@@ -446,14 +443,13 @@ class Ticket(models.Model):
         return errors
     
     @classmethod
-    def new(cls, ticket_code, quantity, type_ticket, user=None, event=None):
-        errors = cls.validate(ticket_code, quantity,type_ticket,user,event)
+    def new(cls, quantity, type_ticket, user=None, event=None):
+        errors = cls.validate( quantity,type_ticket,user,event)
 
         if len(errors.keys()) > 0:
             return False, errors
         
         Ticket.objects.create(
-            ticket_code=ticket_code,
             quantity=quantity,
             type_ticket=type_ticket,
             user=user,
