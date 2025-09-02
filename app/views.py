@@ -20,8 +20,6 @@ class CommentView(View):
     template_name= 'app/event_detail.html'
     context_object_name='comentarios'
 
-
-
 class CompraExitosaView(View):
     template_name='app/confirmar_compra.html'
     context_object_name='compra_exitosa'
@@ -34,6 +32,10 @@ class CompraExitosaView(View):
         event = get_object_or_404(Event, pk=event_id)
         tipo = request.POST.get("tipo")
         cantidad_str = request.POST.get("cantidad")  # puede venir como string vacío
+        nro_tarjeta = request.POST.get('nro_tarjeta')
+        fecha_vencimiento = request.POST.get('fecha_vencimiento')
+        cv_code = request.POST.get('cv_code')
+
 
         errors = {}
 

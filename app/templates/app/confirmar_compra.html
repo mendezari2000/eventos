@@ -1,12 +1,44 @@
-              
-{% extends "base.html" %}   
+{% extends "base.html" %}
+{% load static %}
 
+{% block title %}Compra Exitosa{% endblock %}
 
-    {% block content %}
+{% block content %}
+<style>
+  body {
+    background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
+  }
+  .eventos-section .overlay {
+    background: rgba(0,0,0,0.55);
+    min-height: 100vh;
+    display: flex;
+    align-items: center; /* centra verticalmente */
+    justify-content: center;
+    padding: 2rem;
+  }
+  .card-success {
+    background-color: transparent;
+    border-radius: 1rem;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    padding: 2rem;
+    max-width: 600px;
+    text-align: center;
+  }
+</style>
 
-        <div class="container text-center mt-5">
-            <h2>¡Compra realizada con éxito!</h2>
-            <p>Tu entrada para <strong>{{ event.title }}</strong> fue registrada con éxito.</p>
-            <a href="{% url 'events' %}" class="btn btn-outline-primary mt-3">Volver al inicio</a>
-        </div>
+<div class="eventos-section">
+  <div class="overlay">
+    <div class="card-success">
+      <i class="bi bi-check-circle-fill text-success display-4 mb-3"></i>
+      <h2 class="mb-3">¡Compra realizada con éxito!</h2>
+      <p class="mb-4">
+        Tu entrada para <strong>{{ event.title }}</strong> fue registrada con éxito.
+      </p>
+      <a href="{% url 'events' %}" class="btn btn-primary">
+        Volver al inicio
+      </a>
+    </div>
+  </div>
+</div>
 {% endblock %}

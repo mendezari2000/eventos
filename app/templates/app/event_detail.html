@@ -1,88 +1,135 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+{% load tz %}
+
+{% block title %}{{ event.title }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Detalles del Evento</h5>
-                <p class="card-text">{{ event.description }}</p>
+<style>
+  .card {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+}
 
-                <div class="mt-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-light rounded-circle p-2 me-3">
-                            <i class="bi bi-calendar-event text-primary"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0">Fecha y Hora</h6>
-                            <p class="mb-0">{{ event.date|date:"l, j \\d\\e F \\d\\e Y, H:i" }}</p>
-                        </div>
-                    </div> 
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-light rounded-circle p-2 me-3">
-                            <i class="bi bi-wallet text-success me-2"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0"><strong></strong>Precios</strong></h6>
-                            <p class="mb-0">General: ${{ event.prize|floatformat:2 }}</p>
-                            <p class="mb-0">VIP: ${{ event.precio_vip|floatformat:2 }}</p>
-                        </div>
-                    </div>
+
+  .event-card .ratio > img { object-fit: cover; }
+  .event-card:hover { transform: translateY(-3px); transition: transform .2s ease; }
+  .line-clamp-2 {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  body{
+    background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
+  }
+  .eventos-section .overlay{
+    background: rgba(0,0,0,0.55);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .event-title { margin-bottom: .25rem; }
+  .price { font-weight: 600; }
+</style>
+
+<div class="eventos-section">
+  <div class="overlay">
+    <div class="container">
+      <div class="row justify-content-center g-4">
+        <div class="col-12 col-lg-10">
+          <div class="card shadow-sm event-card">
+            <div class="row g-0">
+              <div class="col-12 col-md-6">
+                <div class="ratio ratio-4x3">
+                  <img
+                    src="{% if event.image %}{{ event.image.url }}{% else %}{% static 'img/event-placeholder.jpg' %}{% endif %}"
+                    alt="Imagen del evento {{ event.title }}"
+                    class="w-100 h-100"
+                    loading="lazy"
+                  />
                 </div>
-                
-                <div class="text-end mt-4">
-                        <form action="{% url 'comprar_ticket' event.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-cart"></i> Comprar Entradas
-                        </button>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="card-body h-100 d-flex flex-column">
+                  <h4 class="event-title">{{ event.title }}</h4>
+
+                  <div class="small text-white mb-1">
+                    {{ event.date|date:"d/m/Y H:i" }}
+                  </div>
+                  <div class="small mb-2">
+                    {{ event.venue.name }}
+                  </div>
+
+                  <div class="mb-2">
+                    <span class="badge bg-light text-dark">{{ event.category.name }}</span>
+                  </div>
+
+                  <div class="price mb-3">
+                    {% if event.prize and event.prize > 0 %}
+                      ${{ event.prize|floatformat:2 }}
+                    {% else %}
+                      Entrada libre
+                    {% endif %}
+                  </div>
+
+                  <p class="mb-4">{{ event.description }}</p>
+
+                  <div class="mt-auto">
+                    <form action="{% url 'comprar_ticket' event.id %}" method="post" class="d-grid">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-primary">
+                        Comprar
+                      </button>
                     </form>
+                  </div>
                 </div>
-
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+
+      <div class="row justify-content-center g-4 mt-1">
+        <div class="col-12 col-lg-10">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="mb-3">Comentarios</h5>
+              {% for comment in comments %}
+                <div class="border rounded p-3 mb-3">
+                  <strong>{{ comment.user.username }}</strong>
+                  <small class="text-white"> · {{ comment.created_at|date:"d/m/Y H:i" }}</small>
+                  {% if comment.title %}<h6 class="mt-2">{{ comment.title }}</h6>{% endif %}
+                  <p class="mb-0">{{ comment.text }}</p>
+                </div>
+              {% empty %}
+                <p>No hay comentarios aún.</p>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="card shadow-sm mt-3">
+            <div class="card-body">
+              <h5 class="mb-3">Dejá tu comentario</h5>
+              <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="title" class="form-label">Título</label>
+                  <input type="text" name="title" id="title" class="form-control" required>
+                  {% if errors.title %}<div class="text-danger">{{ errors.title }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                  <label for="text" class="form-label">Comentario</label>
+                  <textarea name="text" id="text" class="form-control" rows="4" required></textarea>
+                  {% if errors.text %}<div class="text-danger">{{ errors.text }}</div>{% endif %}
+                </div>
+                <button type="submit" class="btn btn-success">Enviar comentario</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <hr class="my-4">
-
-<h5 class="mb-3">Comentarios</h5>
-
-<!-- Mostrar comentarios -->
-{% for comment in comments %}
-    <div class="border rounded p-3 mb-3">
-        <strong>{{ comment.user.username }}</strong> 
-        <small class="text-muted">{{ comment.created_at|date:"d/m/Y H:i" }}</small>
-        <h6 class="mt-2">{{ comment.title }}</h6>
-        <p>{{ comment.text }}</p>
-    </div>
-{% empty %}
-    <p>No hay comentarios aún.</p>
-{% endfor %}
-
-<hr class="my-4">
-
-<!-- Formulario para nuevo comentario -->
-<h5>Dejá tu comentario</h5>
-<form method="post">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label for="title" class="form-label">Título</label>
-        <input type="text" name="title" id="title" class="form-control" required>
-        {% if errors.title %}
-            <div class="text-danger">{{ errors.title }}</div>
-        {% endif %}
-    </div>
-
-    <div class="mb-3">
-        <label for="text" class="form-label">Comentario</label>
-        <textarea name="text" id="text" class="form-control" rows="4" required></textarea>
-        {% if errors.text %}
-            <div class="text-danger">{{ errors.text }}</div>
-        {% endif %}
-    </div>
-
-    <button type="submit" class="btn btn-success">Enviar comentario</button>
-</form>
-
+  </div>
 </div>
 {% endblock %}

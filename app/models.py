@@ -54,6 +54,7 @@ class Category(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
     is_active = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='categorias/', blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -95,6 +96,7 @@ class Event(models.Model):
     venue = models.ForeignKey(Venue, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     prize = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    image = models.ImageField(upload_to='events/', blank=True, null=True)
 
     def __str__(self):
         return self.title

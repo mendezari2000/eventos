@@ -1,39 +1,244 @@
-{% extends "base.html" %}   
+{% extends "base.html" %}
+{% load static %}
+{% load tz %}
+
+{% block title %}Comprar Ticket · {{ event.title }}{% endblock %}
 
 {% block content %}
-    {% if request.user.is_anonymous %}
-        <div class="container text-center mt-5">
-            <h2>Iniciá sesión para comprar ticket</h2>
-            <a href="{% url 'login' %}" class="btn btn-outline-primary mt-3">Iniciar Sesión</a>
-        </div>
-    {% elif request.user.is_authenticated %}
-        <div class="container text-center mt-5">
-            <div class="container mt-3">
-                <h2 class="text-center">Completa tu compra</h2>
-                <form method="post" action="{% url 'compra_exitosa' event.id %}" method="post">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label for="tipo" class="form-label">Tipo de entrada</label>
-                        <select class="form-select w-50 mx-auto" id="tipo" name="tipo">
-                            <option value="general">General - ${{ event.prize }}</option>
-                            <option value="vip">VIP - ${{ event.precio_vip }}</option>
-                        </select>
-                    </div>
 
-                    <div class="mb-3 w-50 mx-auto">
-                        <label for="cantidad" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" value="1" required>
-                    </div>
-                    
-                    <!--<form action="{% url 'comprar_ticket' event.id %}" method="post">
-                    {% csrf_token %}-->
-                    <button type="submit" class="btn btn-success">Confirmar compra</button>
-                </form>
+<html lang="es">
+<head>
+  <style>
+  /* Fondo como en detalle/listado */
+  body{
+    background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
+  }
+  /* Quitar fondo blanco de todas las cards en esta vista */
+.eventos-section .card {
+  background-color: transparent !important; /* transparente */
+  border: none;                             /* opcional, sin borde */
+  color: #fff;                              /* texto blanco */
+}
+
+.eventos-section .overlay{
+    background: rgba(0,0,0,0.55);
+    min-height: 100vh;
+    padding: 2rem;
+    color:white;
+  }
+
+/* Forzar labels y textos apagados a blanco */
+.eventos-section .card .form-label,
+.eventos-section .card .text-muted,
+.eventos-section .card small {
+  color: #fff !important;
+}
+
+/* Opcional: botones outline claros */
+.btn-outline-light {
+  color: #fff;
+  border-color: #fff;
+}
+.btn-outline-light:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+body { margin-top:20px; }
+.panel-title {display: inline;font-weight: bold;}
+.checkbox.pull-right { margin: 0; }
+.pl-ziro { padding-left: 0px; }
+
+</style>
+</head>
+<div class="eventos-section">
+  <div class="overlay">
+    <div class="container">
+      <div class="row justify-content-center g-4">
+        
+        {% if request.user.is_anonymous %}
+          <div class="col-12 text-center">
+            <h2 class="mb-3">Iniciá sesión para comprar</h2>
+            <a href="{% url 'login' %}" class="btn btn-primary">Iniciar sesión</a>
+          </div>
+        {% else %}
+          <h2 class="text-center mb-4">Completa tu compra</h2>
+
+          <!-- Columna 1: Imagen -->
+          <div class="col-12 col-md-6">
+            <div class="card shadow-sm event-card h-100">
+              <div class="ratio ratio-4x3">
+                <img
+                  src="{% if event.image %}{{ event.image.url }}{% else %}{% static 'img/event-placeholder.jpg' %}{% endif %}"
+                  alt="Imagen del evento {{ event.title }}"
+                  class="w-100 h-100"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna 2: Detalles -->
+          <div class="col-12 col-md-6">
+            <div class="card-body">
+              <h4 class="fs-2 mb-1">{{ event.title }}</h4>
+              <div class="fs-5 mb-1">{{ event.date|date:"d/m/Y H:i" }}</div>
+              <div class="fs-5 mb-2">{{ event.venue.name }}</div>
+              <div class="fw-semibold fs-5">
+                {% if event.prize and event.prize > 0 %}
+                  General: ${{ event.prize|floatformat:2 }}
+                {% else %}
+                  Entrada libre
+                {% endif %}
+                {% if event.precio_vip %}
+                  <div>VIP: ${{ event.precio_vip|floatformat:2 }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+    {# PAGO #}
+    <div class="payment-checkout container my-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Detalles de pago</h5>
+          <div class="form-check m-0">
+            <input class="form-check-input" type="checkbox" id="remember-pay">
+            <label class="form-check-label" for="remember-pay">Recordar</label>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <form method="post" action="{% url 'compra_exitosa' event.id %}">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Tipo de entrada</label>
+                <select class="form-select" name="tipo" id="tipoEntrada" required>
+                  <option value="general" data-precio="{{ event.prize|default:0 }}">
+                    General - {% if event.prize %}${{ event.prize|floatformat:2 }}{% else %}Gratis{% endif %}
+                  </option>
+                  {% if event.precio_vip %}
+                    <option value="vip" data-precio = "{{ event.precio_vip }}"> VIP - ${{ event.precio_vip|floatformat:2 }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="cantidadEntrada" name="cantidad" min="1" value="1" required>
+              </div>
+            </div>
+            <ul class="list-group list-group-flush my-4">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Final payment
+                
+                <span class="badge bg-primary rounded-pill" id = "totalPago" >
+                  {% if total %}${{ total }}{% else %}
+                    {% if event.prize %}${{ event.prize|floatformat:2 }}{% else %}0.00{% endif %}
+                  {% endif %}
+                </span>
+              </li>
+            </ul>
+
+            <!-- Número de tarjeta -->
+            <div class="mb-3">
+              <label for="cardNumber" class="form-label">Número de tarjeta</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="cardNumber" name="card_number"
+                       placeholder="1234 5678 9012 3456" required>
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              </div>
             </div>
 
-            <p>Gracias por tu compra, {{ request.user.username }}.</p>
-            <a href="{% url 'events' %}" class="btn btn-primary mt-3">Ver más eventos</a>
+            <!-- Nombre -->
+            <div class="mb-3">
+              <label for="cardName" class="form-label">Nombre de titular</label>
+              <input type="text" class="form-control" id="cardName" name="card_name"
+                placeholder="Como figura en la tarjeta" required>
+            </div>
+
+            <!-- Expiración + CVV -->
+            <div class="row g-3">
+              <div class="col-6">
+                <label for="expMonth" class="form-label">Mes de vencimiento</label>
+                <input type="text" class="form-control" id="expMonth" name="card_exp_month"
+                       placeholder="MM" inputmode="numeric" maxlength="2" required>
+              </div>
+              <div class="col-6">
+                <label for="expYear" class="form-label">Año de vencimiento</label>
+                <input type="text" class="form-control" id="expYear" name="card_exp_year"
+                       placeholder="YY" inputmode="numeric" maxlength="2" required>
+              </div>
+              <div class="col-12">
+                <label for="cvv" class="form-label">Código</label>
+                <input type="password" class="form-control" id="cvv" name="card_cvv"
+                       placeholder="•••" maxlength="4" required>
+              </div>
+            </div>
+
+            <hr class="my-4">            
+
+            
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-success">
+                Comprar
+              </button>
+            </div>
+          </form>
         </div>
-    {% endif %}
-{% endblock %}  
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+
+             
+            </div>
+  
+
+<style>
+  /* ===== Estilos SCOPEADOS: solo afectan dentro de .payment-checkout ===== */
+  .payment-checkout .card { border-radius: 0.75rem; }
+  .payment-checkout .list-group-item { border: none; border-top: 1px solid rgba(0,0,0,.075); }
+  .payment-checkout .input-group-text { background: transparent; }
+</style>
+
+    </div>
+
+      </div><!-- /row -->
+    </div><!-- /container -->
+  </div><!-- /overlay -->
+</div><!-- /eventos-section -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const selectTipo = document.getElementById("tipoEntrada");
+  const inputCantidad = document.getElementById("cantidadEntrada");
+  const totalSpan = document.getElementById("totalPago");
+
+  function actualizarTotal() {
+    const precio = parseFloat(selectTipo.options[selectTipo.selectedIndex].dataset.precio || 0);
+    const cantidad = parseInt(inputCantidad.value) || 1;
+    const total = precio * cantidad;
+    totalSpan.textContent = `$${total.toFixed(2)}`;
+  }
+
+  // Eventos: cuando cambia el tipo o la cantidad
+  selectTipo.addEventListener("change", actualizarTotal);
+  inputCantidad.addEventListener("input", actualizarTotal);
+
+  // Calcular al cargar
+  actualizarTotal();
+});
+</script>
+
+{% endblock %}
+
+

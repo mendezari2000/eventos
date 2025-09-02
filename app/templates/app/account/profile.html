@@ -1,14 +1,50 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block content%}
+{% include "app/account/profile_tabs.html" %}
 
-{% block content %}
-<div class="container mt-5">
-  <h2>Datos de tu cuenta</h2>
-  <p>Usuario: {{user.username}}</p>
-  <p>Mail: {{user.email}}</p>
+<style>
+    body {
+      background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
+
+    }
+
+   /* Contenedor principal */
+    .profile-container {
+        display: flex;
+        margin-top: 20px;
+        gap: 20px;
+    }
+
+  
+  /* Panel principal */
+    .panel {
+        background: rgb(238, 215, 215);
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        flex: 3;
+        padding: 40px;
+    }
+
+    .panel h3 {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color:rgb(19, 15, 15);
+    }
+    .panel p span.label {
+    font-weight: bold;
+    }
+</style>
+
+<!--Contenedor principal-->
+<div class="profile-container">
+  <!--informacion personal-->
+  <div class="panel">
+    <h3>INFORMACIÓN PERSONAL</h3>
+    <p><span class="label">Usuario:  </span>{{user.username}}</p>
+    <p><span class="label">Email:  </span> {{user.email}}</p>
+  </div>
 </div>
-<div class="container mt-4">
-  <a href="{% url 'tickets' %}" class="btn btn-primary">Ver mis tickets</a>
-</div>
 
-
-{% endblock %}
+{% endblock%}

@@ -1,13 +1,48 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Tickets{% endblock %}
 
+
 {% block content %}
+{% include "app/account/profile_tabs.html" %}
+<style>
+    body {
+        background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
+
+    }
+    .mi-tabla {
+        border-collapse: collapse;
+        background-color: rgba(255, 255, 255, 0.842);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .mi-tabla th, .mi-tabla td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+    .mi-tabla th {
+        background: #e7ccbd7e;
+        color: black;
+        text-transform: uppercase;
+        font-size: 14px;
+    }
+    .texto-en-proceso {
+        color: black;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:hover {
+        background-color: #e0e0ff;
+        transform: scale(1.02);
+        transition: .2s;
+    }
+    
+</style>
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Tickets</h1>
-    </div>
-    <table class="table">
+    <table class="mi-tabla">
         <thead>
             <tr>
                 <th>Fecha de compra</th>
@@ -37,7 +72,7 @@
                             {% if ticket.refund_pending %}
                                 <span class="texto-en-proceso">Estamos revisando tu solicitud.</span>
                             {% else %}                              
-                                <a href="{% url 'refund_request' ticket.id %}" class="btn btn-primary">Solicitar Reembolso</a>
+                                <a href="{% url 'refund_request' ticket.id %}" class="btn btn-dark">Solicitar Reembolso</a>
                             {% endif %}
                         {% else %}
                             <span class="texto-no-disponible">Podés pedir el reembolso despues del evento.</span>
