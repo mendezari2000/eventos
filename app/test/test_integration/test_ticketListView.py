@@ -16,7 +16,7 @@ class TicketListViewTest(TestCase):
         )
         self.client.login(username="usuario1", password="contrasenia123")
 
-        # Otro usuario para probar que no se muestren sus tickets
+        # Otro usuario 
         self.user2 = User.objects.create_user(
             username="usuario2",
             password="123456"
@@ -36,7 +36,7 @@ class TicketListViewTest(TestCase):
             is_active=True
         )
 
-        # Crear un evento pasado (para pruebas de reembolso)
+        # Crear un evento pasado (reembolso)
         self.event = Event.objects.create(
             title="Concierto pasado",
             description="Evento pasado",
@@ -46,7 +46,7 @@ class TicketListViewTest(TestCase):
             prize=100
         )
 
-        # Tickets del usuario 1
+        # Tickets usuario 1
         self.ticket1 = Ticket.objects.create(
             user=self.user,
             event=self.event,
@@ -57,7 +57,7 @@ class TicketListViewTest(TestCase):
             ticket_code=str(uuid.uuid4())[:8] 
         )
 
-        # Ticket de otro usuario (no debería aparecer)
+        # Ticket de otro usuario (no debe aparecer)
         self.ticket2 = Ticket.objects.create(
             user=self.user2,
             event=self.event,
@@ -68,7 +68,7 @@ class TicketListViewTest(TestCase):
             ticket_code=str(uuid.uuid4())[:8] 
         )
 
-        # Solicitud de reembolso pendiente
+        # Solicitud reembolso pendiente
         self.refund = RefundRequest.objects.create(
             user=self.user,
             ticket_code=self.ticket1.ticket_code,
@@ -76,7 +76,7 @@ class TicketListViewTest(TestCase):
             resolved=False
         )
 
-    def test_ticket_list_view_muestra_tickets_del_usuario(self):
+    def test_ticket_list_view_usuario(self):
         url = reverse("tickets")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)

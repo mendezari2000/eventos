@@ -455,5 +455,4 @@ class Ticket(models.Model):
             user=user,
             event=event
         )
-        print("ticket guardado")
         return True, None

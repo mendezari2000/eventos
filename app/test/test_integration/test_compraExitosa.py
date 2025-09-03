@@ -48,7 +48,7 @@ class CompraExitosaViewTest(TestCase):
         url = reverse('compra_exitosa', args=[self.event.id])
         data = {
             'tipo': 'GENERAL',
-            'cantidad': '2'
+            'cantidad': '3'
         }
         response = self.client.post(url, data)
         
@@ -60,13 +60,15 @@ class CompraExitosaViewTest(TestCase):
         self.assertIsNotNone(ticket)
         self.assertEqual(Ticket.objects.count(), 1)
 
-        self.assertEqual(ticket.quantity, 2)
+        self.assertEqual(ticket.quantity, 3)
         self.assertEqual(ticket.type_ticket, 'GENERAL')
         self.assertEqual(ticket.prize, 100.0)
-        self.assertEqual(ticket.total, 200.0)  # 100 * 2
+        self.assertEqual(ticket.total, self.event.prize * ticket.quantity)
+        
+
 
     def test_crea_ticket_vip(self):
-        #Prueba que el POST cree un ticket VIP correctamente
+        # Prueba crear ticket VIP correctamente
         url = reverse('compra_exitosa', args=[self.event.id])
         data = {
             'tipo': 'VIP',
