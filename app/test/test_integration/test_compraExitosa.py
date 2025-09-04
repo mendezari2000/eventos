@@ -44,7 +44,7 @@ class CompraExitosaViewTest(TestCase):
 
         self.precio_vip = self.event.precio_vip
 
-    def test_crea_ticket_general(self):
+    def test_create_general_ticket(self):
         url = reverse('compra_exitosa', args=[self.event.id])
         data = {
             'tipo': 'GENERAL',
@@ -67,7 +67,7 @@ class CompraExitosaViewTest(TestCase):
         
 
 
-    def test_crea_ticket_vip(self):
+    def test_create_vip_ticket(self):
         # Prueba crear ticket VIP correctamente
         url = reverse('compra_exitosa', args=[self.event.id])
         data = {

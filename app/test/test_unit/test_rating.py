@@ -14,7 +14,7 @@ class RatingModelTest(TestCase):
             password="password123"
         )
 
-        # Crear venue y categoría de prueba para el evento
+        # Crear venue y categoría de prueba
         self.venue = Venue.objects.create(
             name="Lugar de prueba",
             address="Calle Falsa 123",
@@ -76,7 +76,7 @@ class RatingModelTest(TestCase):
         errors = Rating.validate(
             title="Título",
             text="Texto",
-            rating=6,  # fuera del rango 0-5
+            rating=6,  # fuera de rango
             user=self.user,
             event=self.event
         )

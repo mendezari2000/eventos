@@ -8,13 +8,13 @@ from app.models import Event, Venue, Category, Comment
 
 class EventDetailViewTest(TestCase):
     def setUp(self):
-        # Crear usuario normal
+        # usuario normal
         self.user = User.objects.create_user(
             username="usuario1",
             email="user1@example.com",
             password="contrasenia123"
         )
-        # Crear usuario vendedor
+        # usuario vendedor
         self.vendedor = User.objects.create_user(
             username="vendedor1",
             email="vendedor@example.com",
@@ -23,7 +23,7 @@ class EventDetailViewTest(TestCase):
         group = Group.objects.create(name="Vendedor")
         self.vendedor.groups.add(group)
 
-        # Crear datos básicos
+        # datos
         self.venue = Venue.objects.create(
             name="Sala Principal",
             address="Calle Falsa 123",
@@ -70,7 +70,7 @@ class EventDetailViewTest(TestCase):
         data = {"title": "Nuevo comentario", "text": "Texto de prueba"}
         response = self.client.post(self.url, data)
 
-        # Redirige de vuelta al detalle
+        # Redirige al detalle
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
             Comment.objects.filter(user=self.user, event=self.event, title="Nuevo comentario").exists()

@@ -76,7 +76,7 @@ class TicketListViewTest(TestCase):
             resolved=False
         )
 
-    def test_ticket_list_view_usuario(self):
+    def test_ticket_list_usuario(self):
         url = reverse("tickets")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -89,6 +89,6 @@ class TicketListViewTest(TestCase):
         # Verificar total calculado correctamente
         self.assertEqual(tickets[0].total, 200)
 
-        # Verificar bandera de reembolso pendiente
+        # Verificar reembolso pendiente
         self.assertTrue(tickets[0].refund_pending)
         self.assertFalse(hasattr(tickets[0], "refund_status"))

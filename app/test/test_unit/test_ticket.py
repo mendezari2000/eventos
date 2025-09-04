@@ -14,7 +14,7 @@ class TicketModelTest(TestCase):
             password="password123"
         )
 
-        # Crear venue y categoría de prueba para el evento
+        # Crear venue y categoría de prueba
         self.venue = Venue.objects.create(
             name="Lugar de prueba",
             address="Calle Falsa 123",
