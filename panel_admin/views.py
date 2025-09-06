@@ -38,7 +38,7 @@ class EventListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class EventCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Event
-    fields = ['title','date','venue','category','description']
+    fields = ['title','date','venue','category','description', 'image']
     template_name = "panel_admin/event_form.html"
     success_url = reverse_lazy('panel_admin:admin_dashboard')
 
@@ -47,7 +47,7 @@ class EventCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Event
-    fields = ['title','date','venue','category','description']
+    fields = ['title','date','venue','category','description', 'image']
     template_name = "panel_admin/event_form.html"
     success_url = reverse_lazy('panel_admin:admin_dashboard')
 
@@ -73,7 +73,7 @@ class CategoryListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Category
-    fields = ['name','description','is_active']
+    fields = ['name','description','is_active', 'image']
     template_name = "panel_admin/category_form.html"
     success_url = reverse_lazy('panel_admin:admin_dashboard')
 
@@ -82,7 +82,7 @@ class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Category
-    fields = ['name','description','is_active']
+    fields = ['name','description','is_active', 'image']
     template_name = "panel_admin/category_form.html"
     success_url = reverse_lazy('panel_admin:admin_dashboard')
 

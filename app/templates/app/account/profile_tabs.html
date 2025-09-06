@@ -1,0 +1,28 @@
+
+<style>
+    /* Tabs */
+    .tabs {
+        display: flex;
+        border-bottom: 2px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    .tabs a {
+        padding: 12px 20px;
+        font-weight: bold;
+        text-decoration: none;
+        color: grey;
+        border-bottom: 3px solid transparent;
+        transition: 0.3s;
+    }
+
+    .tabs a.active {
+        color: #85a1c2;
+        border-color: black;
+    }
+
+</style>
+<div class="tabs">
+    <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">MI PERFIL</a>
+    <a href="{% url 'tickets' %}" class="{% if request.resolver_match.url_name == 'tickets' %}active{% endif %}">MIS COMPRAS</a>
+</div>
