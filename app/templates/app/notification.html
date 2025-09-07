@@ -8,8 +8,7 @@
 <style>
     
     body {
-           background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
-
+        background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
     }
     .sidebar {
         background:  rgba(255, 255, 255, 0.842);
@@ -66,8 +65,10 @@
                 <h4 class="mb-3">Notificaciones</h4>
                 {% for notification in notifications %}
                     <div class="notification-item">
-                        <strong>{{ notification.title }}</  strong><br>
-                        <small>{{ notification.created_at|date:"d b Y, H:i"}}</small>
+                        <a href="{% url 'notification_detail' notification.id %}">
+                            <strong>{{ notification.title }}</strong><br>
+                            <small>{{ notification.created_at|date:"d b Y, H:i"}}</small>
+                        </a>            
                     </div>
                 {% empty %}
                     <p class="text-center">No tienes notificaciones.</p>
@@ -75,20 +76,27 @@
             </div>
             <!--Footer fijo abajo-->
             <div class="footer-container mt-auto">
-                <a class="btn-mark-all" href="#">
-                    <span class="normal-icon">
-                        <i class="fa fa-check"></i> Marcar como leído
-                    </span>
+                    <form method="POST" action="{% url 'mark_all_as_read' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-mark-all">
+                            <i class="fa fa-check"></i> Marcar como leído
+                        </button>
+                    </form>
                     <span class="loading-icon icon-no-margin">  
                         <i class="icon fa fa-circle-o-notch fa-spin fa-fw" title="Cargando" aria-label="Cargando"></i>
                     </span>
-                </a>
             </div>
         </div>
     <!--Panel derecho: detalle de las notificaciones-->
     <div class="col-md-8 detail">
-        <h4>Detalle de la notificación</h4>
-        <p>Selecciona una notificación a la izquieda para ver el detalle</p>
+        {% if selected_notification %}
+            <h2>{{ selected_notification.title}}</h2>
+            <p>{{ selected_notification.message }}</p>
+            <p><small>Creada: {{selected_notification.created_at|date:"d b Y, H:i"}}</small></p>
+        {% else %}
+            <h4>Detalle de la notificación</h4>
+            <p>Selecciona una notificación a la izquierda para ver el detalle</p>
+        {% endif %}
     </div>
     </div>
 </div>

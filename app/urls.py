@@ -13,7 +13,7 @@ from .views import (
     ProfileView,
     LogoutView,
     RefundRequestView,
-
+    NotificacionLeidaView,
 )
 from app import views
 
@@ -26,6 +26,8 @@ urlpatterns = [
     path("events/", EventListView.as_view(), name="events"),
     path("events/<int:pk>/", EventDetailView.as_view(), name="event_detail"),
     path("notificaciones/", NotificationListView.as_view(), name="notifications"),
+    path("notificaciones/<int:pk>/", NotificationListView.as_view(), name="notification_detail"),
+    path('notificaciones/marcar-todas-leidas/',NotificacionLeidaView.as_view(), name='mark_all_as_read'),
     path("tickets/", TicketListView.as_view(), name = "tickets"),
     path("register/", RegisterView.as_view(), name="register"),
     path('login/', LoginView.as_view(template_name='app/login.html'), name='login'),

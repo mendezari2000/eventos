@@ -154,7 +154,22 @@ class NotificationListView(ListView):
     context_object_name = "notifications"
 
     def get_queryset(self):
-        return Notification.objects.all().order_by("priority")
+        #lista de notificaciones del usuario
+        return Notification.objects.filter(users=self.request.user).order_by("priority", "-created_at")
+    
+
+    def get_context_data(self, **kwargs):
+        context= super().get_context_data(**kwargs)
+        pk = self.kwargs.get("pk")  # <- capturamos el id si viene en la URL
+        if pk:
+            context["selected_notification"] = Notification.objects.filter(
+                pk=pk, users=self.request.user
+            ).first()
+        else:
+            context["selected_notification"] = None
+        return context
+
+
 
 class HomeView(TemplateView):
     model = Category
@@ -281,3 +296,8 @@ class RefundRequestView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['ticket'] = self.ticket 
         return context
+    
+class NotificacionLeidaView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        Notification.objects.filter(users=request.user, is_read=False).update(is_read=True)
+        return redirect('notifications')
