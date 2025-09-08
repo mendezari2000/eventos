@@ -1,0 +1,32 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<h2>Panel de administración</h2>
+
+{% if es_admin %}
+  <h3>Eventos</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:events_list' %}">Gestionar Eventos</a>
+
+  <h3>Categorías</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:categories_list' %}">Gestionar Categorías</a>
+
+  <h3>Lugares</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:venues_list' %}">Gestionar Lugares</a>
+
+  <h3>Notificaciones</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:notifications_list' %}">Gestionar Notificaciones</a>
+
+{% elif es_vendedor %}
+  <h3>Tickets y Comentarios</h3>
+  <a class="btn btn-primary" href="{% url 'panel_admin:refunds_list' %}">Solicitudes de reembolso</a>
+  <a class="btn btn-primary" href="{% url 'panel_admin:comments_list' %}">Comentarios</a>
+
+{% elif request.user.is_anonymous %}
+  <div class="container text-center mt-5">
+    <h2>Iniciá sesión para ingresar al panel</h2>
+      <a href="{% url 'login' %}" class="btn btn-outline-primary mt-3">Iniciar Sesión</a>
+  </div>
+{% else %}
+  <p>Este sitio es solo para administradores o vendedores. Volvé a la <a href="/">página principal</a>.</p>
+{% endif %}
+{% endblock %}

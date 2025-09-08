@@ -1,0 +1,43 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<h2>Solicitudes de Reembolso</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Código Ticket</th>
+            <th>Usuario</th>
+            <th>Motivo</th>
+            <th>Creada</th>
+            <th>Aprobada</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for refund in refunds %}
+        <tr>
+            <td>{{ refund.ticket_code }}</td>
+            <td>{{ refund.user.username }}</td>
+            <td>{{ refund.reason }}</td>
+            <td>{{ refund.created_at }}</td>
+            <td>{{ refund.approved }}</td>
+            <td>
+                {% if not refund.resolved %}
+                    <a href="{% url 'panel_admin:refund_update' refund.pk %}" class="btn btn-warning">
+                        Resolver
+                    </a>
+                {% else %}
+                    <span class="badge bg-success">Resuelto</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No hay solicitudes de reembolso.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

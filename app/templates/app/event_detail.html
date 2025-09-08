@@ -130,6 +130,56 @@
         </div>
       </div>
     </div>
-  </div>
+    <hr class="my-4">
+
+<h5 class="mb-3">Comentarios</h5>
+
+<!-- Mostrar comentarios -->
+{% for comment in comments %}
+    <div class="border rounded p-3 mb-3">
+        <strong>{{ comment.user.username }}</strong> 
+        <small class="text-muted">{{ comment.created_at|date:"d/m/Y H:i" }}</small>
+        <h6 class="mt-2">{{ comment.title }}</h6>
+        <p>{{ comment.text }}</p>
+
+        {% if is_vendedor %}
+            <form action="{% url 'comment_delete' comment.id %}" method="post" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+            </form>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No hay comentarios aún.</p>
+{% endfor %}
+
+
+
+<hr class="my-4">
+
+<!-- Formulario para nuevo comentario -->
+<h5>Dejá tu comentario</h5>
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="title" class="form-label">Título</label>
+        <input type="text" name="title" id="title" class="form-control" required>
+        {% if errors.title %}
+            <div class="text-danger">{{ errors.title }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label for="text" class="form-label">Comentario</label>
+        <textarea name="text" id="text" class="form-control" rows="4" required></textarea>
+        {% if errors.text %}
+            <div class="text-danger">{{ errors.text }}</div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-success">Enviar comentario</button>
+</form>
+
 </div>
 {% endblock %}

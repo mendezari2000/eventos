@@ -8,7 +8,7 @@ from app.models import Event, Venue, Category
 
 
 class BaseEventTestCase(TestCase):
-    """Clase base con la configuración común para todos los tests de eventos"""
+    #Clase base con la configuración común para todos los tests de eventos
 
     def setUp(self):
         # Crear venue y category de prueba
@@ -48,10 +48,10 @@ class BaseEventTestCase(TestCase):
 
 
 class EventsListViewTest(BaseEventTestCase):
-    """Tests para la vista de listado de eventos"""
+    # Tests para la vista de listado de eventos
 
     def test_events_view(self):
-        """Test que verifica que la vista events funciona correctamente"""
+        # Test que verifica que la vista events funciona correctamente
         response = self.client.get(reverse("events"))
 
         self.assertEqual(response.status_code, 200)
@@ -66,10 +66,9 @@ class EventsListViewTest(BaseEventTestCase):
 
 
 class EventDetailViewTest(BaseEventTestCase):
-    """Tests para la vista de detalle de un evento"""
+   
 
     def test_event_detail_view(self):
-        """Test que verifica que la vista event_detail funciona correctamente"""
         response = self.client.get(reverse("event_detail", args=[self.event1.id]))
 
         self.assertEqual(response.status_code, 200)

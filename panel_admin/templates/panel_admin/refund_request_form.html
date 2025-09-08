@@ -1,0 +1,22 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<h2>Procesar Solicitud de Reembolso</h2>
+
+<p><strong>Usuario:</strong> {{ object.user.username }}</p>
+<p><strong>Código Ticket:</strong> {{ object.ticket_code }}</p>
+<p><strong>Motivo:</strong> {{ object.reason }}</p>
+<p><strong>Creada:</strong> {{ object.created_at }}</p>
+
+<form method="post">
+    {% csrf_token %}
+   <label>
+        <input type="radio" name="decision" value="approve" {% if object.approved %}checked{% endif %}> Aprobar
+    </label>
+    <label>
+        <input type="radio" name="decision" value="reject" {% if object.rejected %}checked{% endif %}> Rechazar
+    </label>
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{% url 'panel_admin:refunds_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

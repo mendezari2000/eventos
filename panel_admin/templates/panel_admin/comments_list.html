@@ -1,0 +1,17 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<h2>Listado de Comentarios</h2>
+<ul>
+  {% if comments %}
+    <li><strong>Comentarios:</strong></li>
+  {% else %}
+    <li>No hay comentarios disponibles.</li>
+  {% endif %}
+  {% for comment in comments %}
+    <li>{{ comment.user.username }}: {{ comment.text }} 
+        <a href="{% url 'panel_admin:comment_delete' comment.pk %}">Eliminar</a>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

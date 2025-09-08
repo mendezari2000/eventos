@@ -1,0 +1,11 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+
+<h1>¿Eliminar evento "{{ object.title }}"?</h1>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Confirmar</button>
+  <a href="{% url 'panel_admin:events_list' %}">Cancelar</a>
+</form>
+{% endblock %}

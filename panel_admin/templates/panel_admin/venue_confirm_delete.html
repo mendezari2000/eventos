@@ -1,0 +1,12 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Confirmar Eliminación de Lugar{% endblock %}
+{% block content %}
+<h1>¿Eliminar lugar "{{ object.name }}"?</h1>
+<form method="post">
+    {% csrf_token %}
+    <p>Esta acción eliminará el lugar y todos los eventos asociados a él.</p>
+    <button type="submit">Confirmar</button>
+    <a href="{% url 'panel_admin:venues_list' %}">Cancelar</a>
+</form>
+{% endblock %}

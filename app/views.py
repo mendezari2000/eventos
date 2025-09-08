@@ -2,7 +2,7 @@ from urllib import request
 import uuid
 from django.urls import reverse
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, DeleteView, View
 from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic.edit import FormView
@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.utils import timezone
 from .forms import RefundRequestForm
@@ -140,10 +140,17 @@ class TicketListView(ListView):
         context['now'] = timezone.now()
         # esto es para mostrar el boton solo si hay una solicitud de reembolso pendiente
         for ticket in context['tickets']:
-            ticket.refund_pending = RefundRequest.objects.filter(
-                ticket_code=ticket.ticket_code, 
-                approval_date__isnull=True
-            ).exists()
+            refund = RefundRequest.objects.filter(ticket_code=ticket.ticket_code).order_by('-created_at').first()
+            if refund:
+                if refund.resolved:
+                    if refund.approved:
+                        ticket.refund_status = "Tu reembolso fue aprobado."
+                    elif refund.rejected:
+                        ticket.refund_status = "Tu reembolso fue rechazado."
+                else:
+                    ticket.refund_pending = True
+            else:
+                ticket.refund_pending = False
         return context
 
 
@@ -169,6 +176,9 @@ class NotificationListView(ListView):
             context["selected_notification"] = None
         return context
 
+        user = self.request.user
+        # Solo las notificaciones asignadas a este usuario
+        return Notification.objects.filter(users=user).order_by("priority", "-created_at")
 
 
 class HomeView(TemplateView):
@@ -222,6 +232,7 @@ class EventDetailView(DetailView):
         event = self.get_object()
         context["comments"] = event.comments.select_related('user').order_by('-created_at')
         context["errors"] = kwargs.get("errors", {})
+        context["is_vendedor"] = self.request.user.groups.filter(name="Vendedor").exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -262,6 +273,10 @@ class RefundRequestView(LoginRequiredMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         # busco el ticket
         self.ticket = get_object_or_404(Ticket, id=kwargs.get('ticket_id'))
+
+        if RefundRequest.objects.filter(ticket_code=self.ticket.ticket_code, resolved=True).exists():
+            messages.error(request, "Ya se ha resuelto una solicitud de reembolso para este ticket.")
+            return redirect('tickets')
         
         # verifico si el ticket es del ussuario
         if self.ticket.user != request.user:
@@ -301,3 +316,15 @@ class NotificacionLeidaView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         Notification.objects.filter(users=request.user, is_read=False).update(is_read=True)
         return redirect('notifications')
+    
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = "app/comment_confirm_delete.html"
+    
+    # Redirige al mismo evento después de borrar
+    def get_success_url(self):
+        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
+    
+    def test_func(self):
+        # Solo vendedores pueden borrar cualquier comentario
+        return self.request.user.groups.filter(name="Vendedor").exists()

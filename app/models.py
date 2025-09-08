@@ -13,14 +13,14 @@ class Venue (models.Model):
         return f"{self.name} - {self.city}"
 
     @classmethod
-    def validate (cls, name, adress, city, capacity, contact):
+    def validate (cls, name, address, city, capacity, contact):
         errors = {}
 
         if name == "":
             errors["name"] = "El lugar debe tener un nombre"
         
-        if adress == "":
-            errors["adress"] = "El lugar debe tener una dirección"
+        if address == "":
+            errors["address"] = "El lugar debe tener una dirección"
         
         if city == "":
             errors["city"] = "El lugar debe tener una ciudad"
@@ -34,15 +34,15 @@ class Venue (models.Model):
         return errors
     
     @classmethod
-    def new(cls, name, adress, city, capacity, contact):
-        errors = Venue.validate(name, adress, city, capacity, contact)
+    def new(cls, name, address, city, capacity, contact):
+        errors = Venue.validate(name, address, city, capacity, contact)
 
         if len(errors.keys()) > 0:
             return False, errors
         
         Venue.objects.create(
             name=name,
-            address=adress,
+            address=address,
             city=city,
             capacity=capacity,
             contact=contact
@@ -251,6 +251,7 @@ class Notification(models.Model):
             priority=priority
         )
         
+        notification.save
         notification.users.set(users)
 
         return True, None
@@ -269,6 +270,8 @@ class Notification(models.Model):
 class RefundRequest (models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refund_requests')
     approved = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
+    resolved = models.BooleanField(default=False)
     approval_date = models.DateField(null=True, blank=True)
     ticket_code = models.CharField(max_length=100)
     reason = models.TextField()
@@ -285,7 +288,7 @@ class RefundRequest (models.Model):
         if reason == "":
             errors["reason"] = "El motivo de la solicitud es obligatorio"
 
-        if user == "":
+        if not user:
             errors["user"] = "El usuario de la solicitud es obligatorio"   
         
         return errors
@@ -388,7 +391,7 @@ class Rating(models.Model):
     
     @classmethod 
     def new (cls, title, text, rating, user=None, event=None):
-        errors = Rating.validate(title, text, rating);
+        errors = Rating.validate(title, text, rating, user, event);
 
         if len(errors.keys()) > 0:
             return False, errors
@@ -424,11 +427,8 @@ class Ticket(models.Model):
     
     
     @classmethod
-    def validate(cls, ticket_code, quantity, type_ticket, user, event):
+    def validate(cls, quantity, type_ticket, user, event):
         errors={}
-
-        if ticket_code =="":
-            errors["ticket_code"] = "El codigo del ticket es obligatorio"
         
         if quantity<0:
             errors["quantity"] = "Debe ingresar una cantidad valida"
@@ -445,18 +445,16 @@ class Ticket(models.Model):
         return errors
     
     @classmethod
-    def new(cls, ticket_code, quantity, type_ticket, user=None, event=None):
-        errors = cls.validate(ticket_code, quantity,type_ticket,user,event)
+    def new(cls, quantity, type_ticket, user=None, event=None):
+        errors = cls.validate( quantity,type_ticket,user,event)
 
         if len(errors.keys()) > 0:
             return False, errors
         
         Ticket.objects.create(
-            ticket_code=ticket_code,
             quantity=quantity,
             type_ticket=type_ticket,
             user=user,
             event=event
         )
-        print("ticket guardado")
         return True, None
