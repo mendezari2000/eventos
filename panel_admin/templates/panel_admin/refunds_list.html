@@ -21,6 +21,7 @@
             <td>{{ refund.user.username }}</td>
             <td>{{ refund.reason }}</td>
             <td>{{ refund.created_at }}</td>
+            <td>{{ refund.approved }}</td>
             <td>
                 {% if not refund.resolved %}
                     <a href="{% url 'panel_admin:refund_update' refund.pk %}" class="btn btn-warning">
