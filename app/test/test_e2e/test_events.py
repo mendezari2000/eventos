@@ -9,7 +9,7 @@ from app.test.test_e2e.base import BaseE2ETest
 
 
 class EventBaseTest(BaseE2ETest):
-    """Clase base específica para tests de eventos"""
+    #Clase base específica para tests de eventos
 
     def setUp(self):
         super().setUp()
@@ -49,69 +49,49 @@ class EventBaseTest(BaseE2ETest):
         )
 
 
-    def _table_has_event_info(self):
-        """Método auxiliar para verificar que la tabla tiene la información correcta de eventos"""
-        # Verificar encabezados de la tabla
-        headers = self.page.locator("table thead th")
-        expect(headers.nth(0)).to_have_text("Título")
-        expect(headers.nth(1)).to_have_text("Descripción")
-        expect(headers.nth(2)).to_have_text("Fecha")
-        expect(headers.nth(3)).to_have_text("Acciones")
-
-        # Verificar que los eventos aparecen en la tabla
-        rows = self.page.locator("table tbody tr")
-        expect(rows).to_have_count(2)
+    def _cards_have_event_info(self):
+        #Verifica que las tarjetas tienen la información correcta de eventos
+        cards = self.page.locator(".event-card")
+        expect(cards).to_have_count(2)
 
         # Verificar datos del primer evento
-        row0 = rows.nth(0)
-        expect(row0.locator("td").nth(0)).to_have_text("Evento de prueba 1")
-        expect(row0.locator("td").nth(1)).to_have_text("Descripción del evento 1")
-        expect(row0.locator("td").nth(2)).to_have_text("10 feb 2025, 10:10")
+        card0 = cards.nth(0)
+        expect(card0.locator(".card-title")).to_have_text("Evento de prueba 1")
+        expect(card0.locator(".card-body")).to_contain_text("10/02/2025 10:10")
+        expect(card0.locator(".card-body")).to_contain_text("Salón Principal")
 
         # Verificar datos del segundo evento
-        expect(rows.nth(1).locator("td").nth(0)).to_have_text("Evento de prueba 2")
-        expect(rows.nth(1).locator("td").nth(1)).to_have_text(
-            "Descripción del evento 2"
-        )
-        expect(rows.nth(1).locator("td").nth(2)).to_have_text("15 mar 2025, 14:30")
+        card1 = cards.nth(1)
+        expect(card1.locator(".card-title")).to_have_text("Evento de prueba 2")
+        expect(card1.locator(".card-body")).to_contain_text("15/03/2025 14:30")
+        expect(card1.locator(".card-body")).to_contain_text("Salón Principal")    
 
-    def _table_has_correct_actions(self):
-        """Método auxiliar para verificar que las acciones son correctas según el tipo de usuario"""
-        row0 = self.page.locator("table tbody tr").nth(0)
+    def _cards_have_correct_actions(self):
+        #Verifica que las acciones en las tarjetas sean correctas
+        card0 = self.page.locator(".event-card").nth(0)
 
-        detail_button = row0.get_by_role("link", name="Ver Detalle")
-        edit_button = row0.get_by_role("link", name="Editar")
-        delete_form = row0.locator("form")
-
-        expect(detail_button).to_be_visible()
-        expect(detail_button).to_have_attribute("href", f"/events/{self.event1.id}/")
-        expect(edit_button).to_have_count(0)
-        expect(delete_form).to_have_count(0)
+        # Botón de comprar visible
+        buy_button = card0.get_by_role("link", name="Comprar")
+        expect(buy_button).to_be_visible()
+        expect(buy_button).to_have_attribute("href", f"/events/{self.event1.id}/")
 
 
 class EventDisplayTest(EventBaseTest):
-    """Tests relacionados con la visualización de la página de eventos"""
+    #Tests relacionados con la visualización de la página de eventos
 
     def test_events_page_display(self):
-        """Test que verifica la visualización correcta de la página de eventos para organizadores"""
         self.page.goto(f"{self.live_server_url}/events/")
 
-        # Verificar el título de la página
         expect(self.page).to_have_title("Eventos")
 
-        # Verificar que existe un encabezado con el texto "Eventos"
-        header = self.page.locator("h1")
-        expect(header).to_have_text("Eventos")
-        expect(header).to_be_visible()
+        cards = self.page.locator(".event-card")
+        expect(cards).to_have_count(2)
 
-        # Verificar que existe una tabla
-        table = self.page.locator("table")
-        expect(table).to_be_visible()
-
-        self._table_has_event_info()
+        self._cards_have_event_info()
+        self._cards_have_correct_actions()
 
     def test_events_page_no_events(self):
-        """Test que verifica el comportamiento cuando no hay eventos"""
+        #Test que verifica el comportamiento cuando no hay eventos
         # Eliminar todos los eventos
         Event.objects.all().delete()
 

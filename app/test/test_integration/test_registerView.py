@@ -8,6 +8,7 @@ class RegisterViewTests(TestCase):
         url = reverse("register")
         data = {
             "username": "nuevo_user",
+            "email": "nuevo@test.com",
             "password1": "Pass12345",
             "password2": "Pass12345",
         }
@@ -25,6 +26,7 @@ class RegisterViewTests(TestCase):
         url = reverse("register")
         data = {
              "username": "nuevo_user",
+             "email": "nuevo@test.com",
              "password1": "Pass12345",
              "password2": "Pass12345",
             }
