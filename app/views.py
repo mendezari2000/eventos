@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.utils import timezone
-from .forms import RefundRequestForm
+from .forms import RefundRequestForm, CustomUserCreationForm
 
 class CommentView(View):
     model= Comment
@@ -112,11 +112,11 @@ class RegisterView(TemplateView):
     context_object_name = "register"
     
     def get(self, request, *args, **kwargs):
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('login')
