@@ -9,7 +9,6 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "panel_admin/dashboard.html"
 
     def test_func(self):
-        user = self.request.user
         return self.request.user.groups.filter(name__in=["Administrador", "Vendedor"]).exists()
     
     def handle_no_permission(self):
