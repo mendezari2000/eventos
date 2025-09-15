@@ -7,22 +7,19 @@
 {% block content %}
 <style>
   .card {
-  background-color: transparent;
-  border: none;
-  color: #fff;
-}
-
+    background-color: transparent;
+    border: none;
+    color: #fff;
+  }
 
   .event-card .ratio > img { object-fit: cover; }
   .event-card:hover { transform: translateY(-3px); transition: transform .2s ease; }
-  .line-clamp-2 {
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-  body{
+  body {
     background: url("{% static 'images/foto_home.jpeg' %}") center/cover fixed no-repeat;
   }
-  .eventos-section .overlay{
+  .eventos-section .overlay {
     background: rgba(0,0,0,0.55);
     min-height: 100vh;
     padding: 2rem;
@@ -30,6 +27,11 @@
 
   .event-title { margin-bottom: .25rem; }
   .price { font-weight: 600; }
+
+  input[name="rating"] {
+    display: none;
+  }
+  .star { cursor: pointer; }
 </style>
 
 <div class="eventos-section">
@@ -49,22 +51,31 @@
                   />
                 </div>
               </div>
-
               <div class="col-12 col-md-6">
                 <div class="card-body h-100 d-flex flex-column">
                   <h4 class="event-title">{{ event.title }}</h4>
 
-                  <div class="small text-white mb-1">
-                    {{ event.date|date:"d/m/Y H:i" }}
-                  </div>
-                  <div class="small mb-2">
-                    {{ event.venue.name }}
+                  <div class="mb-3">
+                    <strong>Calificación promedio:</strong>
+                    <span>
+                      {% for i in "12345" %}
+                        {% if average_rating|floatformat:1 >= forloop.counter %}
+                          <i class="bi bi-star-fill text-warning"></i>
+                        {% elif average_rating|floatformat:1 > forloop.counter0 %}
+                          <i class="bi bi-star-half text-warning"></i>
+                        {% else %}
+                          <i class="bi bi-star text-warning"></i>
+                        {% endif %}
+                      {% endfor %}
+                      <span class="text-muted">({{ ratings_count }} reseñas)</span>
+                    </span>
                   </div>
 
+                  <div class="small text-white mb-1">{{ event.date|date:"d/m/Y H:i" }}</div>
+                  <div class="small mb-2">{{ event.venue.name }}</div>
                   <div class="mb-2">
                     <span class="badge bg-light text-dark">{{ event.category.name }}</span>
                   </div>
-
                   <div class="price mb-3">
                     {% if event.prize and event.prize > 0 %}
                       ${{ event.prize|floatformat:2 }}
@@ -78,11 +89,10 @@
                   <div class="mt-auto">
                     <form action="{% url 'comprar_ticket' event.id %}" method="post" class="d-grid">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-primary">
-                        Comprar
-                      </button>
+                      <button type="submit" class="btn btn-primary">Comprar</button>
                     </form>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -90,6 +100,7 @@
         </div>
       </div>
 
+      <!-- Comentarios -->
       <div class="row justify-content-center g-4 mt-1">
         <div class="col-12 col-lg-10">
           <div class="card shadow-sm">
@@ -127,59 +138,150 @@
               </form>
             </div>
           </div>
+
+          <!-- Calificación -->
+          <div class="card shadow-sm mt-4">
+            <div class="card-body">
+              <h5 class="mb-3">Calificar este evento</h5>
+              {% if user.is_authenticated %}
+                {% if user_has_ticket %}
+                  {% if user_rating %}
+                    <!-- Botón para mostrar formulario de edición -->
+                    <button type="button" class="btn btn-outline-primary" id="edit-rating-btn">
+                      Editar calificación
+                    </button>
+
+                    <form id="edit-rating-form" method="post" style="display:none;">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                        <label>Título</label>
+                        <input type="text" name="title" class="form-control" value="{{ user_rating.title }}">
+                      </div>
+                      <div class="mb-3">
+                        <label>Comentario</label>
+                        <textarea name="text" class="form-control" rows="4">{{ user_rating.text }}</textarea>
+                      </div>
+                      <div class="mb-3">
+                        <label>Puntuación</label>
+                        <div id="star-rating-edit" class="d-flex gap-1 mb-2">
+                          {% for i in "12345" %}
+                            <i class="bi {% if user_rating.rating >= forloop.counter %}bi-star-fill text-warning{% else %}bi-star{% endif %} star"
+                               data-value="{{ forloop.counter }}" style="font-size: 1.8rem;"></i>
+                          {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" value="{{ user_rating.rating }}">
+                      </div>
+                      <button type="submit" class="btn btn-success">Guardar cambios</button>
+                    </form>
+                  {% else %}
+                    <!-- Formulario nueva calificación -->
+                    <form method="post">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                        <label>Título</label>
+                        <input type="text" name="title" class="form-control">
+                      </div>
+                      <div class="mb-3">
+                        <label>Comentario</label>
+                        <textarea name="text" class="form-control" rows="4"></textarea>
+                      </div>
+                      <div class="mb-3">
+                        <label>Puntuación</label>
+                        <div id="star-rating" class="d-flex gap-1 mb-2">
+                          {% for i in "12345" %}
+                            <i class="bi bi-star star" data-value="{{ forloop.counter }}" style="font-size: 1.8rem;"></i>
+                          {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" value="1">
+                      </div>
+                      <button type="submit" class="btn btn-success">Enviar calificación</button>
+                    </form>
+                  {% endif %}
+                {% else %}
+                  <p>Debes comprar una entrada para calificar este evento.</p>
+                {% endif %}
+              {% else %}
+                <p>Debes <a href="{% url 'login' %}">iniciar sesión</a> para calificar este evento.</p>
+              {% endif %}
+
+              <hr>
+
+              <h5 class="mt-4">Reseñas de otros usuarios</h5>
+              {% for rating in event.ratings.all %}
+                <div class="border p-2 mb-2">
+                  <strong>{{ rating.user.username }}</strong>
+                  <p>{{ rating.title }}</p>
+                  <p>{{ rating.text }}</p>
+                  <div class="d-flex gap-1 mb-2">
+                    {% for i in "12345" %}
+                      <i class="bi {% if rating.rating >= forloop.counter %}bi-star-fill text-warning{% else %}bi-star{% endif %}" 
+                         style="font-size: 1.2rem;"></i>
+                    {% endfor %}
+                  </div>
+
+                  {% if user == rating.user %}
+                    <form method="post" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="delete_rating_id" value="{{ rating.id }}">
+                      <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                  {% endif %}
+                </div>
+              {% empty %}
+                <p>No hay reseñas todavía.</p>
+              {% endfor %}
+
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-    <hr class="my-4">
-
-<h5 class="mb-3">Comentarios</h5>
-
-<!-- Mostrar comentarios -->
-{% for comment in comments %}
-    <div class="border rounded p-3 mb-3">
-        <strong>{{ comment.user.username }}</strong> 
-        <small class="text-muted">{{ comment.created_at|date:"d/m/Y H:i" }}</small>
-        <h6 class="mt-2">{{ comment.title }}</h6>
-        <p>{{ comment.text }}</p>
-
-        {% if is_vendedor %}
-            <form action="{% url 'comment_delete' comment.id %}" method="post" class="mt-2">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-            </form>
-        {% endif %}
-    </div>
-{% empty %}
-    <p>No hay comentarios aún.</p>
-{% endfor %}
-
-
-
-<hr class="my-4">
-
-<!-- Formulario para nuevo comentario -->
-<h5>Dejá tu comentario</h5>
-<form method="post">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label for="title" class="form-label">Título</label>
-        <input type="text" name="title" id="title" class="form-control" required>
-        {% if errors.title %}
-            <div class="text-danger">{{ errors.title }}</div>
-        {% endif %}
-    </div>
-
-    <div class="mb-3">
-        <label for="text" class="form-label">Comentario</label>
-        <textarea name="text" id="text" class="form-control" rows="4" required></textarea>
-        {% if errors.text %}
-            <div class="text-danger">{{ errors.text }}</div>
-        {% endif %}
-    </div>
-
-    <button type="submit" class="btn btn-success">Enviar comentario</button>
-</form>
-
+  </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // --- Estrellas creación ---
+  const stars = document.querySelectorAll("#star-rating .star");
+  const input = document.querySelector("#star-rating + input[name='rating']");
+  if (stars && input) {
+      stars.forEach((star, idx) => {
+          star.addEventListener("click", () => {
+              input.value = idx + 1;
+              stars.forEach((s, i) => {
+                  s.classList.toggle("bi-star-fill", i <= idx);
+                  s.classList.toggle("text-warning", i <= idx);
+                  s.classList.toggle("bi-star", i > idx);
+              });
+          });
+      });
+  }
+
+  // --- Estrellas edición ---
+  const editStars = document.querySelectorAll("#star-rating-edit .star");
+  const editInput = document.querySelector("#edit-rating-form input[name='rating']");
+  if (editStars && editInput) {
+      editStars.forEach((star, idx) => {
+          star.addEventListener("click", () => {
+              editInput.value = idx + 1;
+              editStars.forEach((s, i) => {
+                  s.classList.toggle("bi-star-fill", i <= idx);
+                  s.classList.toggle("text-warning", i <= idx);
+                  s.classList.toggle("bi-star", i > idx);
+              });
+          });
+      });
+  }
+
+  // --- Mostrar formulario edición ---
+  const btn = document.getElementById("edit-rating-btn");
+  const form = document.getElementById("edit-rating-form");
+  if (btn && form) {
+      btn.addEventListener("click", () => {
+          form.style.display = form.style.display === "none" ? "block" : "none";
+      });
+  }
+});
+</script>
 {% endblock %}

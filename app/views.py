@@ -2,8 +2,8 @@ from urllib import request
 import uuid
 from django.urls import reverse
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, DeleteView, View
-from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment
+from django.views.generic import TemplateView, ListView, DetailView, DeleteView, View, CreateView, UpdateView
+from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment, Rating
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
@@ -13,7 +13,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.utils import timezone
-from .forms import RefundRequestForm, CustomUserCreationForm
+from .forms import RefundRequestForm, CustomUserCreationForm, RatingForm
+from django.db.models import Avg
 
 class CommentView(View):
     model= Comment
@@ -222,6 +223,7 @@ class EventListView(ListView):
         return context
 
 
+
 class EventDetailView(DetailView):
     model = Event
     template_name = "app/event_detail.html"
@@ -230,28 +232,76 @@ class EventDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         event = self.get_object()
+        user = self.request.user
+
+        # Comentarios
         context["comments"] = event.comments.select_related('user').order_by('-created_at')
         context["errors"] = kwargs.get("errors", {})
-        context["is_vendedor"] = self.request.user.groups.filter(name="Vendedor").exists()
+        context["is_vendedor"] = user.groups.filter(name="Vendedor").exists() if user.is_authenticated else False
+
+        # Información de calificación
+        context["user_has_ticket"] = user.is_authenticated and event.tickets.filter(user=user).exists()
+        context["user_rating"] = Rating.objects.filter(user=user, event=event).first() if user.is_authenticated else None
+        context["rating_form"] = RatingForm(instance=context["user_rating"]) if user.is_authenticated else None
+
+        # promedio de ratings
+        context["average_rating"] = event.ratings.aggregate(Avg("rating"))["rating__avg"] or 0
+        context["ratings_count"] = event.ratings.count()
+
         return context
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()  
-        title = request.POST.get("title", "").strip()
-        text = request.POST.get("text", "").strip()
+        self.object = self.get_object()
 
-        success, errors = Comment.new(
-            user=request.user,
-            event=self.object,
-            title=title,
-            text=text
-        )
-
-        if success:
+        # --- POST de eliminación de rating ---
+        rating_id = request.POST.get('delete_rating_id')
+        if rating_id:
+            rating = get_object_or_404(Rating, pk=rating_id)
+            if rating.user == request.user:
+                rating.delete()
+                messages.success(request, "Reseña eliminada correctamente")
+            else:
+                messages.error(request, "No puedes eliminar esta reseña")
             return redirect("event_detail", pk=self.object.pk)
 
-        context = self.get_context_data(errors=errors)
-        return self.render_to_response(context)
+        # --- POST de comentario ---
+        if "title" in request.POST and "text" in request.POST and "rating" not in request.POST:
+            title = request.POST.get("title", "").strip()
+            text = request.POST.get("text", "").strip()
+
+            success, errors = Comment.new(
+                user=request.user,
+                event=self.object,
+                title=title,
+                text=text
+            )
+
+            if success:
+                return redirect("event_detail", pk=self.object.pk)
+
+            context = self.get_context_data(errors=errors)
+            return self.render_to_response(context)
+
+        # --- POST de rating (nuevo o actualizar) ---
+        if "title" in request.POST and "text" in request.POST and "rating" in request.POST:
+            user_rating = Rating.objects.filter(user=request.user, event=self.object).first()
+            if user_rating:
+                form = RatingForm(request.POST, instance=user_rating)
+            else:
+                form = RatingForm(request.POST)
+
+            if form.is_valid():
+                rating = form.save(commit=False)
+                rating.user = request.user
+                rating.event = self.object
+                rating.save()
+                return redirect("event_detail", pk=self.object.pk)
+
+            context = self.get_context_data(errors=form.errors)
+            context["rating_form"] = form
+            return self.render_to_response(context)
+
+        return redirect("event_detail", pk=self.object.pk)
 
 class ProfileView(TemplateView):
     model = User
@@ -328,3 +378,5 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         # Solo vendedores pueden borrar cualquier comentario
         return self.request.user.groups.filter(name="Vendedor").exists()
+    
+

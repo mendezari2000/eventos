@@ -39,7 +39,6 @@ class RatingModelTest(TestCase):
         )
 
     # ------------------- Tests de validate -------------------
-
     def test_validate_with_valid_data(self):
         errors = Rating.validate(
             title="Buen evento",
@@ -76,7 +75,7 @@ class RatingModelTest(TestCase):
         errors = Rating.validate(
             title="Título",
             text="Texto",
-            rating=6,  # fuera de rango
+            rating=6,
             user=self.user,
             event=self.event
         )
@@ -106,9 +105,8 @@ class RatingModelTest(TestCase):
         self.assertEqual(errors["event"], "Es obligatorio ingresar el evento")
 
     # ------------------- Tests de new -------------------
-
     def test_new_with_valid_data(self):
-        success, errors = Rating.new(
+        success, rating = Rating.new(
             title="Excelente",
             text="Me encantó",
             rating=5,
@@ -116,9 +114,7 @@ class RatingModelTest(TestCase):
             event=self.event
         )
         self.assertTrue(success)
-        self.assertIsNone(errors)
-
-        rating = Rating.objects.get(title="Excelente")
+        self.assertEqual(rating.title, "Excelente")
         self.assertEqual(rating.text, "Me encantó")
         self.assertEqual(rating.rating, 5)
         self.assertEqual(rating.user, self.user)
@@ -128,7 +124,7 @@ class RatingModelTest(TestCase):
         success, errors = Rating.new(
             title="",
             text="",
-            rating=10,  # fuera de rango
+            rating=10,
             user=None,
             event=None
         )
@@ -138,3 +134,84 @@ class RatingModelTest(TestCase):
         self.assertIn("rating", errors)
         self.assertIn("user", errors)
         self.assertIn("event", errors)
+
+    # ------------------- Tests de update -------------------
+    def test_update_rating_success(self):
+        success, rating = Rating.new(
+            title="Original",
+            text="Texto original",
+            rating=3,
+            user=self.user,
+            event=self.event
+        )
+        self.assertTrue(success)
+
+        success, updated = rating.update(
+            title="Actualizado",
+            text="Texto actualizado",
+            rating=5,
+            user=self.user
+        )
+        self.assertTrue(success)
+        self.assertEqual(updated.title, "Actualizado")
+        self.assertEqual(updated.text, "Texto actualizado")
+        self.assertEqual(updated.rating, 5)
+
+    def test_update_rating_not_owner(self):
+        other_user = User.objects.create_user(
+            username="otro",
+            email="otro@example.com",
+            password="password123"
+        )
+
+        success, rating = Rating.new(
+            title="Original",
+            text="Texto original",
+            rating=3,
+            user=self.user,
+            event=self.event
+        )
+        self.assertTrue(success)
+
+        success, errors = rating.update(
+            title="Hack",
+            text="Hackeado",
+            rating=1,
+            user=other_user
+        )
+        self.assertFalse(success)
+        self.assertIn("user", errors)
+
+    # ------------------- Tests de delete_rating -------------------
+    def test_delete_rating_success(self):
+        success, rating = Rating.new(
+            title="Eliminar",
+            text="Texto a eliminar",
+            rating=4,
+            user=self.user,
+            event=self.event
+        )
+        self.assertTrue(success)
+        success, _ = rating.delete_rating(user=self.user)
+        self.assertTrue(success)
+        self.assertFalse(Rating.objects.filter(pk=rating.pk).exists())
+
+    def test_delete_rating_not_owner(self):
+        other_user = User.objects.create_user(
+            username="otro",
+            email="otro@example.com",
+            password="password123"
+        )
+
+        success, rating = Rating.new(
+            title="No eliminar",
+            text="Texto",
+            rating=2,
+            user=self.user,
+            event=self.event
+        )
+        self.assertTrue(success)
+        success, errors = rating.delete_rating(user=other_user)
+        self.assertFalse(success)
+        self.assertIn("user", errors)
+        self.assertTrue(Rating.objects.filter(pk=rating.pk).exists())

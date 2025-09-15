@@ -39,4 +39,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('tickets/<int:ticket_id>/refund/', RefundRequestView.as_view(), name='refund_request'),
     path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment_delete'),
+    path('event/<int:event_id>/rating/create/', EventDetailView.as_view(), name='rating_create'),
+    path('rating/<int:pk>/edit/', EventDetailView.as_view(), name='rating_update'),
+    path('rating/<int:pk>/delete/', EventDetailView.as_view(), name='delete_rating'),
 ]

@@ -357,52 +357,73 @@ class Comment (models.Model):
         return f"Comment by {self.user.username} on {self.event}"
 
 class Rating(models.Model):
-    title = models.CharField(max_length=200)
-    text = models.TextField()
-    rating = models.IntegerField()
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
+    title = models.TextField(blank=False)
+    text = models.TextField(blank=False)
+    rating = models.PositiveSmallIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE, related_name='ratings')
-    event = models.ForeignKey('Event',on_delete=models.CASCADE, related_name='ratings') 
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('event', 'user')
 
     def __str__(self):
-        return f"Rating de {self.title} igual a {self.rating}"
-        
-    
+        return f"{self.user.username} - {self.event.title} - {self.rating}"
+
     @classmethod
-    def validate (cls, title, text, rating, user, event):
+    def validate(cls, title, text, rating, user, event):
         errors = {}
-
-        if title == "":
-            errors["title"] = "Debe ingresar un titulo"
-
-        if text == "":
+        if not title:
+            errors["title"] = "Debe ingresar un título"
+        if not text:
             errors["text"] = "Debe ingresar un texto"
-
-        if (rating<0) or (rating>5):
-            errors["rating"] = "Debe ingresar un puntuación"
-        
+        if not (1 <= rating <= 5):
+            errors["rating"] = "Debe ingresar una puntuación entre 1 y 5"
         if user is None:
             errors["user"] = "Es obligatorio un usuario"
-        
         if event is None:
             errors["event"] = "Es obligatorio ingresar el evento"
 
-        return errors
-    
-    @classmethod 
-    def new (cls, title, text, rating, user=None, event=None):
-        errors = Rating.validate(title, text, rating, user, event);
-
-        if len(errors.keys()) > 0:
-            return False, errors
+        # Verificar si el usuario compró la entrada
         
-        Rating.objects.create(
-            title=title,
-            text=text,
-            rating=rating,
-            user=user,
-            event=event,
-        )
+        if not Ticket.objects.filter(user=user, event=event).exists():
+            errors["user"] = "El usuario debe haber comprado la entrada para calificar este evento"
+        return errors
+
+    @classmethod
+    def new(cls, title, text, rating, user=None, event=None):
+        errors = cls.validate(title, text, rating, user, event)
+        if errors:
+            return False, errors
+        obj = cls.objects.create(title=title, text=text, rating=rating, user=user, event=event)
+        return True, obj
+
+    def update(self, title=None, text=None, rating=None, user=None):
+        # Solo el propietario puede actualizar
+        if user != self.user:
+            return False, {"user": "No puede editar la calificación de otro usuario"}
+
+        # Validar nuevos datos
+        new_title = title if title is not None else self.title
+        new_text = text if text is not None else self.text
+        new_rating = rating if rating is not None else self.rating
+        errors = self.validate(new_title, new_text, new_rating, self.user, self.event)
+
+        if errors:
+            return False, errors
+
+        self.title = new_title
+        self.text = new_text
+        self.rating = new_rating
+        self.save()
+        return True, self
+
+    def delete_rating(self, user=None):
+        # Solo el propietario puede eliminar
+        if user != self.user:
+            return False, {"user": "No puede eliminar la calificación de otro usuario"}
+        self.delete()
         return True, None
 
 class Type_Ticket(models.TextChoices):
