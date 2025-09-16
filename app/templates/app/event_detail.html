@@ -59,15 +59,15 @@
                     <strong>Calificación promedio:</strong>
                     <span>
                       {% for i in "12345" %}
-                        {% if average_rating|floatformat:1 >= forloop.counter %}
+                        {% if average_rating >= forloop.counter %}
                           <i class="bi bi-star-fill text-warning"></i>
-                        {% elif average_rating|floatformat:1 > forloop.counter0 %}
+                        {% elif average_rating > forloop.counter0 %}
                           <i class="bi bi-star-half text-warning"></i>
-                        {% else %}
+                          {% else %}
                           <i class="bi bi-star text-warning"></i>
                         {% endif %}
                       {% endfor %}
-                      <span class="text-muted">({{ ratings_count }} reseñas)</span>
+                      <span class="ms-2 text-white">({{ ratings_count }} reseñas)</span>
                     </span>
                   </div>
 
@@ -124,15 +124,16 @@
               <h5 class="mb-3">Dejá tu comentario</h5>
               <form method="post">
                 {% csrf_token %}
+                <input type="hidden" name="form_type" value="comment">
                 <div class="mb-3">
                   <label for="title" class="form-label">Título</label>
                   <input type="text" name="title" id="title" class="form-control" required>
-                  {% if errors.title %}<div class="text-danger">{{ errors.title }}</div>{% endif %}
+                  {% if comment_errors.title %}<div class="text-danger">{{ comment_errors.title }}</div>{% endif %}
                 </div>
                 <div class="mb-3">
                   <label for="text" class="form-label">Comentario</label>
                   <textarea name="text" id="text" class="form-control" rows="4" required></textarea>
-                  {% if errors.text %}<div class="text-danger">{{ errors.text }}</div>{% endif %}
+                  {% if comment_errors.text %}<div class="text-danger">{{ comment_errors.text }}</div>{% endif %}
                 </div>
                 <button type="submit" class="btn btn-success">Enviar comentario</button>
               </form>
@@ -153,6 +154,7 @@
 
                     <form id="edit-rating-form" method="post" style="display:none;">
                       {% csrf_token %}
+                      <input type="hidden" name="form_type" value="rating">
                       <div class="mb-3">
                         <label>Título</label>
                         <input type="text" name="title" class="form-control" value="{{ user_rating.title }}">
@@ -177,13 +179,16 @@
                     <!-- Formulario nueva calificación -->
                     <form method="post">
                       {% csrf_token %}
+                      <input type="hidden" name="form_type" value="rating">
                       <div class="mb-3">
                         <label>Título</label>
                         <input type="text" name="title" class="form-control">
+                        {% if rating_errors.title %}<div class="text-danger">{{ rating_errors.title }}</div>{% endif %} 
                       </div>
                       <div class="mb-3">
                         <label>Comentario</label>
                         <textarea name="text" class="form-control" rows="4"></textarea>
+                        {% if rating_errors.text %}<div class="text-danger">{{ rating_errors.text }}</div>{% endif %}
                       </div>
                       <div class="mb-3">
                         <label>Puntuación</label>
@@ -193,6 +198,7 @@
                           {% endfor %}
                         </div>
                         <input type="hidden" name="rating" value="1">
+                        {% if rating_errors.rating %}<div class="text-danger">{{ rating_errors.rating }}</div>{% endif %}
                       </div>
                       <button type="submit" class="btn btn-success">Enviar calificación</button>
                     </form>

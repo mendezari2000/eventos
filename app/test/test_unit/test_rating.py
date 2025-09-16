@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
-from app.models import Rating, Event, Venue, Category
+from app.models import Rating, Event, Venue, Category, Ticket
 
 class RatingModelTest(TestCase):
 
@@ -38,6 +38,15 @@ class RatingModelTest(TestCase):
             category=self.category
         )
 
+        # Crear ticket de prueba para el usuario y evento
+        Ticket.objects.create(
+            user=self.user,
+            event=self.event,
+            quantity=1,
+            prize=self.event.prize,
+            total=self.event.prize * 1
+        )
+
     # ------------------- Tests de validate -------------------
     def test_validate_with_valid_data(self):
         errors = Rating.validate(
@@ -58,7 +67,7 @@ class RatingModelTest(TestCase):
             event=self.event
         )
         self.assertIn("title", errors)
-        self.assertEqual(errors["title"], "Debe ingresar un titulo")
+        self.assertEqual(errors["title"], "Debe ingresar un título")
 
     def test_validate_with_empty_text(self):
         errors = Rating.validate(
@@ -80,7 +89,7 @@ class RatingModelTest(TestCase):
             event=self.event
         )
         self.assertIn("rating", errors)
-        self.assertEqual(errors["rating"], "Debe ingresar un puntuación")
+        self.assertEqual(errors["rating"], "Debe ingresar una puntuación entre 1 y 5")
 
     def test_validate_with_no_user(self):
         errors = Rating.validate(
@@ -91,7 +100,7 @@ class RatingModelTest(TestCase):
             event=self.event
         )
         self.assertIn("user", errors)
-        self.assertEqual(errors["user"], "Es obligatorio un usuario")
+        self.assertEqual(errors["user"], "El usuario debe haber comprado la entrada para calificar este evento")
 
     def test_validate_with_no_event(self):
         errors = Rating.validate(
@@ -182,7 +191,7 @@ class RatingModelTest(TestCase):
         self.assertFalse(success)
         self.assertIn("user", errors)
 
-    # ------------------- Tests de delete_rating -------------------
+    # ------------------- Tests de delete -------------------
     def test_delete_rating_success(self):
         success, rating = Rating.new(
             title="Eliminar",

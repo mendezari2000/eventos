@@ -236,7 +236,8 @@ class EventDetailView(DetailView):
 
         # Comentarios
         context["comments"] = event.comments.select_related('user').order_by('-created_at')
-        context["errors"] = kwargs.get("errors", {})
+        context["comment_errors"] = kwargs.get("comment_errors", {})
+        context["rating_errors"] = kwargs.get("rating_errors", {})
         context["is_vendedor"] = user.groups.filter(name="Vendedor").exists() if user.is_authenticated else False
 
         # Información de calificación
@@ -245,13 +246,14 @@ class EventDetailView(DetailView):
         context["rating_form"] = RatingForm(instance=context["user_rating"]) if user.is_authenticated else None
 
         # promedio de ratings
-        context["average_rating"] = event.ratings.aggregate(Avg("rating"))["rating__avg"] or 0
+        context["average_rating"] = float(event.ratings.aggregate(Avg("rating"))["rating__avg"] or 0)
         context["ratings_count"] = event.ratings.count()
 
         return context
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+        form_type = request.POST.get("form_type")
 
         # --- POST de eliminación de rating ---
         rating_id = request.POST.get('delete_rating_id')
@@ -265,7 +267,7 @@ class EventDetailView(DetailView):
             return redirect("event_detail", pk=self.object.pk)
 
         # --- POST de comentario ---
-        if "title" in request.POST and "text" in request.POST and "rating" not in request.POST:
+        if form_type == "comment":
             title = request.POST.get("title", "").strip()
             text = request.POST.get("text", "").strip()
 
@@ -279,11 +281,11 @@ class EventDetailView(DetailView):
             if success:
                 return redirect("event_detail", pk=self.object.pk)
 
-            context = self.get_context_data(errors=errors)
+            context = self.get_context_data(comment_errors=errors)
             return self.render_to_response(context)
 
         # --- POST de rating (nuevo o actualizar) ---
-        if "title" in request.POST and "text" in request.POST and "rating" in request.POST:
+        if form_type == "rating":
             user_rating = Rating.objects.filter(user=request.user, event=self.object).first()
             if user_rating:
                 form = RatingForm(request.POST, instance=user_rating)
@@ -297,7 +299,7 @@ class EventDetailView(DetailView):
                 rating.save()
                 return redirect("event_detail", pk=self.object.pk)
 
-            context = self.get_context_data(errors=form.errors)
+            context = self.get_context_data(rating_errors=form.errors)
             context["rating_form"] = form
             return self.render_to_response(context)
 

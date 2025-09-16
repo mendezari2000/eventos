@@ -1,4 +1,4 @@
-# forms.py
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -33,7 +33,7 @@ class RatingForm(forms.ModelForm):
                 'placeholder': 'Escribe tu reseña...'
             }),
             'rating': forms.NumberInput(attrs={
-                'class': 'form-control d-none',  # ocultamos el input real
+                'class': 'form-control d-none',  
                 'min': 1,
                 'max': 5
             }),

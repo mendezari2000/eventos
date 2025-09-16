@@ -67,7 +67,11 @@ class EventDetailViewTest(TestCase):
     def test_crea_comentario_valido(self):
         
         self.client.login(username="usuario1", password="contrasenia123")
-        data = {"title": "Nuevo comentario", "text": "Texto de prueba"}
+        data = {
+            "form_type": "comment",
+            "title": "Nuevo comentario",
+            "text": "Texto de prueba"
+        }
         response = self.client.post(self.url, data)
 
         # Redirige al detalle
@@ -79,7 +83,11 @@ class EventDetailViewTest(TestCase):
     def test_comentario_invalido(self):
         
         self.client.login(username="usuario1", password="contrasenia123")
-        data = {"title": "", "text": ""}  
+        data = {
+            "form_type": "comment",
+            "title": "",
+            "text": ""
+        }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)  
         self.assertContains(response, "El titulo del comentario es obligatorio") 
