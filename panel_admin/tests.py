@@ -23,8 +23,6 @@ class BaseTestCase(TestCase):
         self.vendor_user.groups.add(self.vendor_group)
         self.client_user.groups.add(self.client_group)
 
-        print(self.admin_user.groups.all())
-
 
         # Crear datos de prueba
         self.venue = Venue.objects.create(
