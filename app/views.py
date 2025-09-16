@@ -190,6 +190,7 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["categories"] = Category.objects.all()
+        context["events"] = Event.objects.all().order_by("date")
         return context
 
 
