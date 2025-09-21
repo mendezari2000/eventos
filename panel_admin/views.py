@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from app.models import Event, Category, Venue, Comment, Ticket, RefundRequest, Notification
+from panel_admin.forms import EventForm
 
 # ------------------- DASHBOARD -------------------
 class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -37,7 +38,7 @@ class EventListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class EventCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Event
-    fields = ['title','date','venue','category','description', 'image', 'prize']
+    form_class = EventForm
     template_name = "panel_admin/event_form.html"
     success_url = reverse_lazy('panel_admin:admin_dashboard')
 
@@ -46,7 +47,7 @@ class EventCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Event
-    fields = ['title','date','venue','category','description', 'image', 'prize']
+    form_class = EventForm
     template_name = "panel_admin/event_form.html"
     success_url = reverse_lazy('panel_admin:admin_dashboard')
 
