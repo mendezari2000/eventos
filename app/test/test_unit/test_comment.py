@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from app.models import Event, Venue, Category, Comment
 from django.utils import timezone
 from datetime import timedelta
+from django.urls import reverse
 
 class CommentModelTest(TestCase):
 
@@ -118,3 +119,43 @@ class CommentModelTest(TestCase):
         self.assertIn("event", errors)
         self.assertIn("title", errors)
         self.assertIn("text", errors)
+
+    def test_delete_comment(self):
+        # Crear un comentario de prueba
+        comment = Comment.objects.create(
+            user=self.user,
+            event=self.event,
+            title="Comentario a eliminar",
+            text="Texto a eliminar"
+        )
+
+        # Simular eliminación
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("event_detail", kwargs={"pk": self.event.pk}), {
+            "form_type": "delete_comment",
+            "comment_id": comment.id
+        })
+
+        # Comprobar redirección
+        self.assertEqual(response.status_code, 302)
+
+        # Comprobar comentario eliminado
+        with self.assertRaises(Comment.DoesNotExist):
+            Comment.objects.get(id=comment.id)
+
+    def test_delete_comment_other_user_forbidden(self):
+        other_user = User.objects.create_user(username="user2", password="pass123")
+        comment = Comment.objects.create(
+            user=other_user,
+            event=self.event,
+            title="Comentario de otro usuario",
+            text="Texto"
+        )
+
+        # usuario actual intenta eliminar comentario de otro
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("event_detail", kwargs={"pk": self.event.pk}), {
+            "form_type": "delete_comment",
+            "comment_id": comment.id
+        })
+        self.assertTrue(Comment.objects.filter(id=comment.id).exists())

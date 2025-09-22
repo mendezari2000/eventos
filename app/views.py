@@ -2,7 +2,7 @@ from urllib import request
 import uuid
 from django.urls import reverse
 from django.views import View
-from django.views.generic import TemplateView, ListView, DetailView, DeleteView, View, CreateView, UpdateView
+from django.views.generic import TemplateView, ListView, DetailView, View
 from .models import Event, Notification, Category, Ticket, User, RefundRequest, Comment, Rating
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic.edit import FormView
@@ -267,7 +267,7 @@ class EventDetailView(DetailView):
                 messages.error(request, "No puedes eliminar esta reseña")
             return redirect("event_detail", pk=self.object.pk)
 
-        # --- POST de comentario ---
+        # --- POST de creación de comentario ---
         if form_type == "comment":
             title = request.POST.get("title", "").strip()
             text = request.POST.get("text", "").strip()
@@ -285,7 +285,36 @@ class EventDetailView(DetailView):
             context = self.get_context_data(comment_errors=errors)
             return self.render_to_response(context)
 
-        # --- POST de rating (nuevo o actualizar) ---
+        # --- POST de edición de comentario ---
+        if form_type == "edit_comment":
+            comment_id = request.POST.get("comment_id")
+            comment = get_object_or_404(Comment, id=comment_id)
+            text = request.POST.get("text", "").strip()
+            title = request.POST.get("title", "").strip()
+
+            errors = {}
+            if not title:
+                errors["title"] = "El título no puede estar vacío"
+            if not text:
+                errors["text"] = "El comentario no puede estar vacío"
+            
+            if errors:
+                context = self.get_context_data(comment_errors={"comment_id": comment.id, **errors})
+                return self.render_to_response(context)
+            
+            comment.title = title
+            comment.text = text
+            comment.save()
+            return redirect("event_detail", pk=self.object.pk)
+
+        # --- POST de eliminación de comentario ---
+        if form_type == "delete_comment":
+            comment_id = request.POST.get("comment_id")
+            comment = get_object_or_404(Comment, id=comment_id)
+            comment.delete()
+            return redirect("event_detail", pk=self.object.pk)
+
+        # --- POST de rating ---
         if form_type == "rating":
             user_rating = Rating.objects.filter(user=request.user, event=self.object).first()
             if user_rating:
@@ -370,16 +399,5 @@ class NotificacionLeidaView(LoginRequiredMixin, View):
         Notification.objects.filter(users=request.user, is_read=False).update(is_read=True)
         return redirect('notifications')
     
-class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = Comment
-    template_name = "app/comment_confirm_delete.html"
-    
-    # Redirige al mismo evento después de borrar
-    def get_success_url(self):
-        return reverse_lazy('event_detail', kwargs={'pk': self.object.event.pk})
-    
-    def test_func(self):
-        # Solo vendedores pueden borrar cualquier comentario
-        return self.request.user.groups.filter(name="Vendedor").exists()
     
 

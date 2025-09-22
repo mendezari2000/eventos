@@ -107,11 +107,66 @@
             <div class="card-body">
               <h5 class="mb-3">Comentarios</h5>
               {% for comment in comments %}
-                <div class="border rounded p-3 mb-3">
-                  <strong>{{ comment.user.username }}</strong>
-                  <small class="text-white"> · {{ comment.created_at|date:"d/m/Y H:i" }}</small>
-                  {% if comment.title %}<h6 class="mt-2">{{ comment.title }}</h6>{% endif %}
-                  <p class="mb-0">{{ comment.text }}</p>
+                <div class="border rounded p-3 mb-4">
+
+                  <div class="comment-header mb-2">
+                    <div class="d-flex align-items-center mb-2">
+                      <strong class="d-block mb-1">{{ comment.user.username }}</strong>
+                      <small class="text-white ms-3">{{ comment.created_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    <h6 class="mb-2">{{ comment.title }}</h6>
+                    <p class="mb-3">{{ comment.text }}</p>
+                  </div>
+
+                  {% if user.id == comment.user.id %}
+                    <!-- Botones de editar y eliminar -->
+                    <div class="d-flex gap-2 mb-2">
+                      <button type="button" class="btn btn-sm btn-primary edit-comment-btn" data-index="{{ forloop.counter0 }}">
+                        Editar
+                      </button>
+
+                      <form method="POST" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="delete_comment">
+                        <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                      </form>
+                    </div>
+
+                    <!-- Formulario de edición -->
+                    <div id="edit-comment-{{ forloop.counter0 }}" class="edit-comment-form" style="display:none;">
+                      <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="edit_comment">
+                        <input type="hidden" name="comment_id" value="{{ comment.id }}">
+
+                        <!-- Título -->
+                        <div class="mb-2">
+                          <label>Título</label>
+                          <input type="text" name="title" class="form-control" value="{{ comment.title|escape }}">
+                          {% if comment_errors and comment_errors.comment_id == comment.id %}
+                            {% if comment_errors.title %}<div class="text-danger">{{ comment_errors.title }}</div>{% endif %}
+                          {% endif %}
+                        </div>
+
+                        <!-- Texto -->
+                        <div class="mb-2">
+                          <label>Comentario</label>
+                          <textarea name="text" class="form-control" rows="3">{{ comment.text|escape }}</textarea>
+                          {% if comment_errors and comment_errors.comment_id == comment.id %}
+                            {% if comment_errors.text %}<div class="text-danger">{{ comment_errors.text }}</div>{% endif %}
+                          {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                          <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('edit-comment-{{ forloop.counter0 }}').style.display='none'">
+                            Cancelar
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  {% endif %}
                 </div>
               {% empty %}
                 <p>No hay comentarios aún.</p>
@@ -288,6 +343,20 @@ document.addEventListener("DOMContentLoaded", function () {
           form.style.display = form.style.display === "none" ? "block" : "none";
       });
   }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  // --- Mostrar / ocultar formulario de edición de comentarios ---
+  const editButtons = document.querySelectorAll(".edit-comment-btn");
+
+  editButtons.forEach(btn => {
+    const index = btn.dataset.index;
+    const form = document.getElementById(`edit-comment-${index}`);
+
+    btn.addEventListener("click", () => {
+      form.style.display = form.style.display === "none" ? "block" : "none";
+    });
+  });
 });
 </script>
 {% endblock %}
