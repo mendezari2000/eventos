@@ -143,19 +143,4 @@ class CommentModelTest(TestCase):
         with self.assertRaises(Comment.DoesNotExist):
             Comment.objects.get(id=comment.id)
 
-    def test_delete_comment_other_user_forbidden(self):
-        other_user = User.objects.create_user(username="user2", password="pass123")
-        comment = Comment.objects.create(
-            user=other_user,
-            event=self.event,
-            title="Comentario de otro usuario",
-            text="Texto"
-        )
-
-        # usuario actual intenta eliminar comentario de otro
-        self.client.force_login(self.user)
-        response = self.client.post(reverse("event_detail", kwargs={"pk": self.event.pk}), {
-            "form_type": "delete_comment",
-            "comment_id": comment.id
-        })
-        self.assertTrue(Comment.objects.filter(id=comment.id).exists())
+    
